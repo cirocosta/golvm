@@ -3,6 +3,8 @@ package lib
 import (
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
@@ -39,7 +41,53 @@ func (l Lvm) PhysicalVolumes() (output string, err error) {
 	return
 }
 
-func ParsePhysicalVolumesResponse(response string) (err error) {
+func ParsePhysicalVolumesResponseLine(line string) (p *PhysicalInfo, err error) {
+	var (
+		parts            []string
+		physicalSize     float64
+		physicalSizeFree float64
+	)
+
+	if line == "" {
+		err = errors.Errorf("can't parse infomation from empty line")
+		return
+	}
+
+	line = strings.TrimSpace(line)
+
+	parts = strings.SplitN(line, ":", 6)
+	if len(parts) != 6 {
+		err = errors.Errorf(
+			"malformed line %s - expected 6 fields delimited by colon",
+			line)
+		return
+	}
+
+	physicalSize, err = strconv.ParseFloat(parts[4], 64)
+	if err != nil {
+		err = errors.Wrapf(err,
+			"couldn't convert physical size %s to float",
+			parts[4])
+		return
+	}
+
+	physicalSizeFree, err = strconv.ParseFloat(parts[5], 64)
+	if err != nil {
+		err = errors.Wrapf(err,
+			"couldn't convert physical size free %s to float",
+			parts[5])
+		return
+	}
+
+	p = &PhysicalInfo{
+		PhysicalVolume:   parts[0],
+		VolumeGroup:      parts[1],
+		Fmt:              parts[2],
+		Attr:             parts[3],
+		PhysicalSize:     physicalSize,
+		PhysicalFreeSize: physicalSizeFree,
+	}
+
 	return
 }
 
