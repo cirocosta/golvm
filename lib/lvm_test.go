@@ -37,6 +37,19 @@ func TestParsePhysycalVolumesOutput(t *testing.T) {
 			},
 			shouldError: false,
 		},
+		{
+			desc:  "valid with attr and vg set",
+			input: "/dev/loop0:myvg:lvm2:a--:48.00:48.00",
+			expected: &PhysicalInfo{
+				PhysicalVolume:   "/dev/loop0",
+				VolumeGroup:      "myvg",
+				Fmt:              "lvm2",
+				Attr:             "a--",
+				PhysicalSize:     48,
+				PhysicalFreeSize: 48,
+			},
+			shouldError: false,
+		},
 	}
 
 	var (
@@ -52,7 +65,7 @@ func TestParsePhysycalVolumesOutput(t *testing.T) {
 				return
 			}
 
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t,
 				tc.expected.Attr,
 				actual.Attr)
