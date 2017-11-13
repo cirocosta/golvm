@@ -20,7 +20,12 @@ func TestParsePhysycalVolumesOutput(t *testing.T) {
 			shouldError: true,
 		},
 		{
-			desc:  "single pv",
+			desc:        "malformed",
+			input:       "uhsduah",
+			shouldError: true,
+		},
+		{
+			desc:  "valid with leading space",
 			input: "  /dev/loop0::lvm2:---:50.00:50.00",
 			expected: &PhysicalInfo{
 				PhysicalVolume:   "/dev/loop0",
