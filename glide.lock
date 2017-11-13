@@ -1,10 +1,23 @@
-hash: 135ad88f5144e3a792e6858c6036999e278c8298b3bacc58c3162d09b50d8cb0
-updated: 2017-11-11T22:22:20.727731657-02:00
+hash: 5b6f34b0736d9ae3e860de05b4c51ad7eecd8f771dd1d1c9c351dc5b44f4eb80
+updated: 2017-11-13T20:14:13.450520925-02:00
 imports:
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
+- name: github.com/rs/zerolog
+  version: 2ed2f2c974489526d10329dae76d0f175684109a
+  subpackages:
+  - internal/json
 - name: github.com/stretchr/testify
   version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
   - assert
-testImports: []
+  - require
+testImports:
+- name: github.com/davecgh/go-spew
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
+  subpackages:
+  - spew
+- name: github.com/pmezard/go-difflib
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
+  subpackages:
+  - difflib

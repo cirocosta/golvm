@@ -1,43 +1,96 @@
 package lib
 
 import (
-	"fmt"
+	"os"
 	"os/exec"
+
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
 )
 
-type SystemRepository interface {
-	PhysicalVolumes() (output string, err error)
-	VolumeGroups() (output string, err error)
-	LogicalVolumes() (output string, err error)
+type Lvm struct {
+	logger zerolog.Logger
 }
 
-type RealSystemRepository struct {
-}
+type LvmConfig struct{}
 
-func (repo RealSystemRepository) PhysicalVolumes() (output string, err error) {
-	delimiter = ":"
-	output, err = repo.runCommand("pvs", "--units=m", "--separator=:", "--nosuffix", "--noheadings")
+func NewLvm(cfg LvmConfig) (l Lvm, err error) {
+	l.logger = zerolog.New(os.Stdout).With().
+		Str("from", "lvm").
+		Logger()
+
 	return
 }
 
-func (repo RealSystemRepository) VolumeGroups() (output string, err error) {
-	delimiter = ":"
-	output, err = repo.runCommand("vgs", "--units=m", "--separator=:", "--nosuffix", "--noheadings")
-	return
-}
+func (l Lvm) PhysicalVolumes() (output string, err error) {
+	l.logger.Debug().Msg("retrieving physical volumes")
 
-func (repo RealSystemRepository) LogicalVolumes() (output string, err error) {
-	delimiter = ":"
-	output, err = repo.runCommand("lvs", "--units=m", "--separator=:", "--nosuffix", "--noheadings")
-	return
-}
-
-func (repo RealSystemRepository) runCommand(name string, args ...string) (output string, err error) {
-	cmd := exec.Command(name, args...)
-	out, err := cmd.Output()
-	output = fmt.Sprintf("%s", out)
+	output, err = l.run("pvs",
+		"--units=m",
+		"--separator=:",
+		"--nosuffix",
+		"--noheadings")
 	if err != nil {
+		err = errors.Wrapf(err,
+			"failed to retrieve physical volumes")
 		return
 	}
+
+	return
+}
+
+func ParsePhysicalVolumesResponse(response string) (err error) {
+	return
+}
+
+func (l Lvm) VolumeGroups() (output string, err error) {
+	l.logger.Debug().Msg("retrieving volume groups")
+
+	output, err = l.run("vgs",
+		"--units=m",
+		"--separator=:",
+		"--nosuffix",
+		"--noheadings")
+	if err != nil {
+		err = errors.Wrapf(err,
+			"failed to retrieve volume groups")
+		return
+	}
+
+	return
+}
+
+func (l Lvm) LogicalVolumes() (output string, err error) {
+	l.logger.Debug().Msg("retrieving logical volumes")
+
+	output, err = l.run("lvs",
+		"--units=m",
+		"--separator=:",
+		"--nosuffix",
+		"--noheadings")
+	if err != nil {
+		err = errors.Wrapf(err,
+			"failed to retrieve logical volumes")
+		return
+	}
+	return
+}
+
+func (l Lvm) run(name string, args ...string) (output string, err error) {
+	l.logger.Debug().
+		Str("cmd", name).
+		Strs("args", args).
+		Msg("executing command")
+
+	cmd := exec.Command(name, args...)
+	out, err := cmd.Output()
+	if err != nil {
+		err = errors.Wrapf(err,
+			"failed to execute command %s with args %+v",
+			name, args)
+		return
+	}
+
+	output = string(out)
 	return
 }
