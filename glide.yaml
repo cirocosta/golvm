@@ -1,0 +1,6 @@
+package: github.com/cirocosta/golvm
+import:
+- package: github.com/pkg/errors
+- package: github.com/stretchr/testify
+  subpackages:
+  - assert
