@@ -1,0 +1,16 @@
+language: 'go'
+
+sudo: 'required'
+
+go:
+  - '1.9.2'
+
+install:
+  - 'sudo bash ./utils/main.sh'
+
+script:
+  - 'cd ./lib && sudo /home/travis/.gimme/versions/go/bin/go test -v'
+
+notifications:
+  email: false
+

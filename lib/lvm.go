@@ -170,6 +170,22 @@ func (l Lvm) LogicalVolumes() (output []byte, err error) {
 	return
 }
 
+type LogicalVolumeCreationConfig struct {
+	IsSnapshot bool
+	Thinpool   string
+	IsSnapshot bool
+	Keyfile    string
+	// Size represents the size of the logical volume.
+	// It can be represented as a string in the format
+	// of '1G', '25.3M', etc
+	Size uint64
+}
+
+// Creates a logical volume using the definition passed.
+func (l Lvm) CreateLogicalVolume(def *LogicalVolume) (err error) {
+	return
+}
+
 // run executes a given command whose executable
 // is 'name' and whose arguments are 'args'.
 // The executed command inherits the parent environment
