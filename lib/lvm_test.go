@@ -7,46 +7,56 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	respVgs1 = `
+{
+    "report": [
+        {
+            "pv": [
+                {
+                    "pv_attr": "a--",
+                    "pv_fmt": "lvm2",
+                    "pv_free": "48.00",
+                    "pv_name": "/dev/loop0",
+                    "pv_size": "48.00",
+                    "vg_name": "myvg"
+                }
+            ]
+        }
+    ]
+}`
+)
+
 func TestParsePhysycalVolumesOutput(t *testing.T) {
 	var testCases = []struct {
 		desc        string
-		input       string
-		expected    *PhysicalInfo
+		input       []byte
+		expected    []*PhysicalInfo
 		shouldError bool
 	}{
 		{
-			desc:        "empty",
-			input:       "",
+			desc:        "nil input should fail",
+			input:       nil,
 			shouldError: true,
 		},
 		{
-			desc:        "malformed",
-			input:       "uhsduah",
+			desc:        "empty input should fail",
+			input:       []byte(""),
+			expected:    []*PhysicalInfo{},
 			shouldError: true,
 		},
 		{
-			desc:  "valid with leading space",
-			input: "  /dev/loop0::lvm2:---:50.00:50.00",
-			expected: &PhysicalInfo{
-				PhysicalVolume:   "/dev/loop0",
-				VolumeGroup:      "",
-				Fmt:              "lvm2",
-				Attr:             "---",
-				PhysicalSize:     50,
-				PhysicalFreeSize: 50,
-			},
-			shouldError: false,
-		},
-		{
-			desc:  "valid with attr and vg set",
-			input: "/dev/loop0:myvg:lvm2:a--:48.00:48.00",
-			expected: &PhysicalInfo{
-				PhysicalVolume:   "/dev/loop0",
-				VolumeGroup:      "myvg",
-				Fmt:              "lvm2",
-				Attr:             "a--",
-				PhysicalSize:     48,
-				PhysicalFreeSize: 48,
+			desc:  "valid response should return valid",
+			input: []byte(respVgs1),
+			expected: []*PhysicalInfo{
+				&PhysicalInfo{
+					Attr:             "a--",
+					Fmt:              "lvm2",
+					PhysicalSize:     48,
+					PhysicalVolume:   "/dev/loop0",
+					PhysicalSizeFree: 48,
+					VolumeGroup:      "myvg",
+				},
 			},
 			shouldError: false,
 		},
@@ -54,33 +64,41 @@ func TestParsePhysycalVolumesOutput(t *testing.T) {
 
 	var (
 		err    error
+		infos  []*PhysicalInfo
 		actual *PhysicalInfo
 	)
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			actual, err = ParsePhysicalVolumesResponseLine(tc.input)
+			infos, err = DecodePhysicalVolumesResponse(tc.input)
 			if tc.shouldError {
 				require.Error(t, err)
 				return
 			}
 
 			require.NoError(t, err)
-			assert.Equal(t,
-				tc.expected.Attr,
-				actual.Attr)
-			assert.Equal(t,
-				tc.expected.VolumeGroup,
-				actual.VolumeGroup)
-			assert.Equal(t,
-				tc.expected.Fmt,
-				actual.Fmt)
-			assert.Equal(t,
-				tc.expected.PhysicalSize,
-				actual.PhysicalSize)
-			assert.Equal(t,
-				tc.expected.PhysicalFreeSize,
-				actual.PhysicalFreeSize)
+			require.Equal(t, len(tc.expected), len(infos))
+
+			for ndx, expectedInfo := range tc.expected {
+				actual = infos[ndx]
+
+				assert.Equal(t,
+					expectedInfo.Attr,
+					actual.Attr)
+				assert.Equal(t,
+					expectedInfo.VolumeGroup,
+					actual.VolumeGroup)
+				assert.Equal(t,
+					expectedInfo.Fmt,
+					actual.Fmt)
+				assert.Equal(t,
+					expectedInfo.PhysicalSize,
+					actual.PhysicalSize)
+				assert.Equal(t,
+					expectedInfo.PhysicalSizeFree,
+					actual.PhysicalSizeFree)
+			}
+
 		})
 	}
 }
