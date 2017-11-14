@@ -12,6 +12,12 @@ type VolumeGroupsReport struct {
 	} `json:"report"`
 }
 
+type LogicalVolumesReport struct {
+	Report []struct {
+		Lv []*LogicalVolume `json:"lv"`
+	} `json:"report"`
+}
+
 type PhysicalVolume struct {
 	PhysicalVolume   string  `json:"pv_name"`
 	VolumeGroup      string  `json:"vg_name"`
@@ -31,4 +37,17 @@ type VolumeGroup struct {
 	SnapCount uint64  `json:"snap_count,string"`
 }
 
-type LogicalVolumesReport struct{}
+type LogicalVolume struct {
+	ConvertLv       string  `json:"convert_lv"`
+	CopyPercent     string  `json:"copy_percent"`
+	DataPercent     string  `json:"data_percent"`
+	LvAttr          string  `json:"lv_attr"`
+	LvName          string  `json:"lv_name"`
+	LvSize          float64 `json:"lv_size,string"`
+	MetadataPercent string  `json:"metadata_percent"`
+	MirrorLog       string  `json:"mirror_log"`
+	MovePv          string  `json:"move_pv"`
+	Origin          string  `json:"origin"`
+	PoolLv          string  `json:"pool_lv"`
+	VgName          string  `json:"vg_name"`
+}

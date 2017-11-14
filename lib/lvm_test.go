@@ -44,6 +44,29 @@ const (
         }
     ]
 }`
+	respLvs1 = `
+{
+    "report": [
+        {
+            "lv": [
+                {
+                    "convert_lv": "",
+                    "copy_percent": "",
+                    "data_percent": "",
+                    "lv_attr": "-wi-a-----",
+                    "lv_name": "lv1",
+                    "lv_size": "12.00",
+                    "metadata_percent": "",
+                    "mirror_log": "",
+                    "move_pv": "",
+                    "origin": "",
+                    "pool_lv": "",
+                    "vg_name": "myvg"
+                }
+            ]
+        }
+    ]
+}`
 )
 
 func TestParsePhysycalVolumesOutput(t *testing.T) {
@@ -199,6 +222,73 @@ func TestParseVolumeGroupsOutput(t *testing.T) {
 				assert.Equal(t,
 					expectedInfo.SnapCount,
 					actual.SnapCount)
+			}
+
+		})
+	}
+}
+
+func TestParseLogicalVolumesOutput(t *testing.T) {
+	var testCases = []struct {
+		desc        string
+		input       []byte
+		expected    []*LogicalVolume
+		shouldError bool
+	}{
+		{
+			desc:        "nil input should fail",
+			input:       nil,
+			shouldError: true,
+		},
+		{
+			desc:        "empty input should fail",
+			input:       []byte(""),
+			expected:    []*LogicalVolume{},
+			shouldError: true,
+		},
+		{
+			desc:  "valid response should return valid",
+			input: []byte(respLvs1),
+			expected: []*LogicalVolume{
+				&LogicalVolume{
+					LvName: "lv1",
+					LvSize: 12.0,
+					LvAttr: "-wi-a-----",
+				},
+			},
+			shouldError: false,
+		},
+	}
+
+	var (
+		err    error
+		infos  []*LogicalVolume
+		actual *LogicalVolume
+	)
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			infos, err = DecodeLogicalVolumesResponse(tc.input)
+			if tc.shouldError {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			require.Equal(t, len(tc.expected), len(infos))
+
+			for ndx, expectedInfo := range tc.expected {
+				actual = infos[ndx]
+
+				assert.Equal(t,
+					expectedInfo.LvName,
+					actual.LvName)
+				assert.Equal(t,
+					expectedInfo.LvSize,
+					actual.LvSize)
+				assert.Equal(t,
+					expectedInfo.LvAttr,
+					actual.LvAttr)
 			}
 
 		})

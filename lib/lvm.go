@@ -104,6 +104,38 @@ func DecodeVolumeGroupsResponse(response []byte) (infos []*VolumeGroup, err erro
 	return
 }
 
+// DecodeLogicalVolumesResponse takes a JSON response from
+// the execition of the 'lvs' command and returns a slice of
+// VolumeGroup structs.
+func DecodeLogicalVolumesResponse(response []byte) (infos []*LogicalVolume, err error) {
+	if response == nil {
+		err = errors.Errorf("response can't be nil")
+		return
+	}
+
+	if len(response) == 0 {
+		err = errors.Errorf("can't decode empty response")
+		return
+	}
+
+	var report = new(LogicalVolumesReport)
+	err = json.Unmarshal(response, report)
+	if err != nil {
+		err = errors.Wrapf(err, "errored decoding lvs response")
+		return
+	}
+
+	if len(report.Report) != 1 {
+		err = errors.Errorf(
+			"unexpected number of responses decoded - %s",
+			response)
+		return
+	}
+
+	infos = report.Report[0].Lv
+	return
+}
+
 func (l Lvm) VolumeGroups() (output []byte, err error) {
 	l.logger.Debug().Msg("retrieving volume groups")
 
