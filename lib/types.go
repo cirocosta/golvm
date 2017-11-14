@@ -1,38 +1,18 @@
 package lib
 
-// PhysicalInfo represents the result of the retrieval
-// of a single entry from the execution of the 'vgs'
-// command.
-//
-//	e.g:	PV:VG:Fmt:Attr:PSize:PFree
-//
-
-//
-// {
-//  "report": [
-//    {
-//      "vg": [
-//	{
-//	  "vg_name": "myvg",
-//	  "pv_count": "1",
-//	  "lv_count": "0",
-//	  "snap_count": "0",
-//	  "vg_attr": "wz--n-",
-//	  "vg_size": "48,00",
-//	  "vg_free": "48,00"
-//	}
-//      ]
-//    }
-//  ]
-// }
-
 type PhysicalVolumesReport struct {
 	Report []struct {
-		Pv []*PhysicalInfo `json:"pv"`
+		Pv []*PhysicalVolume `json:"pv"`
 	} `json:"report"`
 }
 
-type PhysicalInfo struct {
+type VolumeGroupsReport struct {
+	Report []struct {
+		Vg []*VolumeGroup `json:"vg"`
+	} `json:"report"`
+}
+
+type PhysicalVolume struct {
 	PhysicalVolume   string  `json:"pv_name"`
 	VolumeGroup      string  `json:"vg_name"`
 	Attr             string  `json:"pv_attr"`
@@ -41,14 +21,14 @@ type PhysicalInfo struct {
 	PhysicalSizeFree float64 `json:"pv_free,string"`
 }
 
-//   VG:#PV:#LV:#SN:Attr:VSize:VFree
-//   myvg:1:0:0:wz--n-:48,00:48,00
-
 type VolumeGroup struct {
-	Name            string
-	PhysicalVolumes int
-	LogicalVolumes  int
+	Attr      string  `json:"vg_attr"`
+	Name      string  `json:"vg_name"`
+	Free      float64 `json:"vg_free,string"`
+	Size      float64 `json:"vg_size,string"`
+	LvCount   uint64  `json:"lv_count,string"`
+	PvCount   uint64  `json:"pv_count,string"`
+	SnapCount uint64  `json:"snap_count,string"`
 }
 
-type VolumeGroupsReport struct{}
 type LogicalVolumesReport struct{}
