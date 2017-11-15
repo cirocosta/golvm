@@ -200,7 +200,7 @@ func (l Lvm) BuildLogicalVolumeCretionArgs(cfg *LvCreationConfig) (args []string
 		hasSize        = cfg.Size != ""
 		hasKeyFile     = cfg.KeyFile != ""
 		hasThinPool    = cfg.ThinPool != ""
-		finfo os.FileInfo
+		finfo          os.FileInfo
 	)
 
 	if cfg.Name == "" {
@@ -256,7 +256,6 @@ func (l Lvm) BuildLogicalVolumeCretionArgs(cfg *LvCreationConfig) (args []string
 		return
 	}
 
-
 	args = []string{"--setactivationskip", "n"}
 	args = append(args, "--name", cfg.Name)
 
@@ -311,4 +310,3 @@ func (l Lvm) run(name string, args ...string) (out []byte, err error) {
 
 	return
 }
-

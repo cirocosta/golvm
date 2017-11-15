@@ -2,7 +2,7 @@
 
 set -o errexit
 
-readony IMAGES_DIR="/images"
+readonly IMAGES_DIR="/images"
 
 main() {
 	setup_images_dir
