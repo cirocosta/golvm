@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	socketAddress = "/run/docker/plugins/lvmvol.sock"
+	socketAddress = "/run/docker/plugins/golvm.sock"
 )
 
 var (

@@ -1,0 +1,33 @@
+{
+    "Description": "Docker plugin to manage LVM volumes",
+    "Documentation": "https://github.com/cirocosta/golvm",
+    "Entrypoint": [
+        "/golvm"
+    ],
+    "Env": [],
+    "Interface": {
+        "Socket": "golvm.sock",
+        "Types": [
+            "docker.volumedriver/1.0"
+        ]
+    },
+    "Linux": {
+        "Capabilities": [
+            "CAP_SYS_ADMIN"
+        ]
+    },
+    "Mounts": [
+        {
+            "Destination": "/mnt",
+            "Options": [
+                "bind"
+            ],
+            "Source": "/mnt",
+            "Type": "bind"
+        }
+    ],
+    "Network": {
+        "Type": "host"
+    },
+    "PropagatedMount": "/mnt"
+}
