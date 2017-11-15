@@ -5,3 +5,4 @@ import:
   subpackages:
   - assert
   - require
+- package: github.com/docker/go-units
