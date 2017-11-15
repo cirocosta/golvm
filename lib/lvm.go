@@ -171,12 +171,13 @@ func (l Lvm) LogicalVolumes() (output []byte, err error) {
 }
 
 type LvCreationConfig struct {
-	Name        string
-	Size        string
-	Snapshot    string
-	KeyFile     string
-	ThinPool    string
-	VolumeGroup string
+	Name            string
+	Size            string
+	Snapshot        string
+	KeyFile         string
+	ThinPool        string
+	VolumeGroup     string
+	ThinVolumeGroup string
 }
 
 // CreateLogicalVolume creates a logical volume using the definition passed.

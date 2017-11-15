@@ -308,6 +308,58 @@ func TestBuildLogicalVolumeCreationArgs(t *testing.T) {
 			expected:    []string{},
 			shouldError: true,
 		},
+		{
+			desc: "without a vg should fail",
+			cfg: &LvCreationConfig{
+				Name: "haha",
+			},
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc: "fails with only name and vg ",
+			cfg: &LvCreationConfig{
+				Name:        "name",
+				VolumeGroup: "volumegroup",
+			},
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc: "snap fails with only name and vg",
+			cfg: &LvCreationConfig{
+				Name:        "name",
+				VolumeGroup: "volumegroup",
+				Snapshot:    "snapshot",
+			},
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc: "snap fails with only name and vg",
+			cfg: &LvCreationConfig{
+				Name:        "name",
+				VolumeGroup: "volumegroup",
+				Snapshot:    "snapshot",
+			},
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc: "vol works with name, size and vg",
+			cfg: &LvCreationConfig{
+				Name:        "name",
+				VolumeGroup: "volumegroup",
+				Size:        "22M",
+			},
+			expected: []string{
+				"--setactivationskip", "n",
+				"--name", "name",
+				"--size", "22M",
+				"volumegroup",
+			},
+			shouldError: false,
+		},
 	}
 
 	var (
