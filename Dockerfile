@@ -14,10 +14,11 @@ RUN set -ex && \
         -ldflags "-X main.version=$(cat ./VERSION) -extldflags \"-static\"" && \
   mv ./golvm /usr/bin/golvm
 
-FROM busybox
+FROM alpine
 COPY --from=builder /usr/bin/golvm /golvm
 
 RUN set -x && \
+  apk add --update lvm2 && \
   mkdir -p /var/log/golvm /mnt
 
 CMD [ "golvm" ]

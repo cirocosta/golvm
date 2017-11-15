@@ -41,13 +41,49 @@ func NewDriver(cfg DriverConfig) (d Driver, err error) {
 }
 
 func (d Driver) Create(req *v.CreateRequest) (err error) {
-	d.Lock()
-	defer d.Unlock()
+	var (
+		size        string
+		thinpool    string
+		snapshot    string
+		keyfile     string
+		volumegroup string
+		args        []string
+	)
 
 	d.logger.Debug().
 		Str("name", req.Name).
 		Interface("opts", req.Options).
 		Msg("starting creation")
+
+	d.Lock()
+	defer d.Unlock()
+
+	size, _ = req.Options["size"]
+	thinpool, _ = req.Options["thinpool"]
+	snapshot, _ = req.Options["snapshot"]
+	keyfile, _ = req.Options["keyfile"]
+	volumegroup, _ = req.Options["volumegroup"]
+
+	config := &lib.LvCreationConfig{
+		Name:        req.Name,
+		Size:        size,
+		ThinPool:    thinpool,
+		Snapshot:    snapshot,
+		KeyFile:     keyfile,
+		VolumeGroup: volumegroup,
+	}
+
+	args, err = d.lvm.BuildLogicalVolumeCretionArgs(config)
+	if err != nil {
+		err = errors.Wrapf(err, "couldn't build volume creation args")
+		return
+	}
+
+	err = d.lvm.CreateLv(args...)
+	if err != nil {
+		err = errors.Wrapf(err, "failed to create logical volume")
+		return
+	}
 
 	return
 }
@@ -55,6 +91,8 @@ func (d Driver) Create(req *v.CreateRequest) (err error) {
 func (d Driver) List() (resp *v.ListResponse, err error) {
 	d.Lock()
 	defer d.Unlock()
+
+	// lists all volumes that were created by the volume plugin
 
 	//        resp.Volumes = make([]*v.Volume, len(dirs))
 	//        for idx, dir := range dirs {

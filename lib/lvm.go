@@ -24,9 +24,10 @@ func NewLvm(cfg LvmConfig) (l Lvm, err error) {
 }
 
 func (l Lvm) PhysicalVolumes() (output []byte, err error) {
-	l.logger.Debug().Msg("retrieving physical volumes")
+	l.logger.Debug().
+		Msg("retrieving physical volumes")
 
-	output, err = l.run("pvs",
+	output, err = l.Run("pvs",
 		"--units=m",
 		"--nosuffix",
 		"--noheadings",
@@ -139,7 +140,7 @@ func DecodeLogicalVolumesResponse(response []byte) (infos []*LogicalVolume, err 
 func (l Lvm) VolumeGroups() (output []byte, err error) {
 	l.logger.Debug().Msg("retrieving volume groups")
 
-	output, err = l.run("vgs",
+	output, err = l.Run("vgs",
 		"--units=m",
 		"--nosuffix",
 		"--noheadings",
@@ -157,7 +158,7 @@ func (l Lvm) VolumeGroups() (output []byte, err error) {
 func (l Lvm) LogicalVolumes() (output []byte, err error) {
 	l.logger.Debug().Msg("retrieving logical volumes")
 
-	output, err = l.run("lvs",
+	output, err = l.Run("lvs",
 		"--units=m",
 		"--nosuffix",
 		"--noheadings",
@@ -286,13 +287,20 @@ func (l Lvm) DeleteLogicalVolume(def *LogicalVolume) (err error) {
 	return
 }
 
+// CreateLv runs the 'lvcreate' command with
+// the arguments provided.
+func (l Lvm) CreateLv(args ...string) (err error) {
+	_, err = l.Run("lvcreate", args...)
+	return
+}
+
 // run executes a given command whose executable
 // is 'name' and whose arguments are 'args'.
 // The executed command inherits the parent environment
 // with the addition of LC_NUMERIC set to en_US.UTF-8 in
 // order to prevent the use of commas as the floating point
 // separator.
-func (l Lvm) run(name string, args ...string) (out []byte, err error) {
+func (l Lvm) Run(name string, args ...string) (out []byte, err error) {
 	l.logger.Debug().
 		Str("cmd", name).
 		Strs("args", args).
