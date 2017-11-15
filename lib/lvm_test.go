@@ -294,3 +294,45 @@ func TestParseLogicalVolumesOutput(t *testing.T) {
 		})
 	}
 }
+
+func TestBuildLogicalVolumeCreationArgs(t *testing.T) {
+	var testCases = []struct {
+		desc        string
+		cfg         *LvCreationConfig
+		expected    []string
+		shouldError bool
+	}{
+		{
+			desc:        "without a name should fail",
+			cfg:         &LvCreationConfig{},
+			expected:    []string{},
+			shouldError: true,
+		},
+	}
+
+	var (
+		err  error
+		l    Lvm
+		args []string
+	)
+
+	l, err = NewLvm(LvmConfig{})
+	require.NoError(t, err)
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			args, err = l.BuildLogicalVolumeCretionArgs(tc.cfg)
+			if tc.shouldError {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			require.Equal(t, len(tc.expected), len(args))
+			for ndx, arg := range args {
+				assert.Equal(t, tc.expected[ndx], arg)
+			}
+		})
+	}
+
+}
