@@ -10,3 +10,4 @@ import:
   version: master
   subpackages:
   - volume
+- package: gopkg.in/urfave/cli.v2

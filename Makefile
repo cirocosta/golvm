@@ -9,9 +9,12 @@ fmt:
 	go fmt
 	cd ./lib && go fmt
 	cd ./driver && go fmt
+	cd ./lvmctl && go fmt
+	cd ./lvmctl/commands && go fmt
 
 install:
 	go install -v
+	cd ./lvmctl && go install -v
 
 test:
 	cd ./lib && go test -v
