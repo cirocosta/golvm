@@ -4,6 +4,8 @@ import (
 	"os"
 	"sync"
 
+	"github.com/cirocosta/golvm/lib"
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 
 	v "github.com/docker/go-plugins-helpers/volume"
@@ -14,13 +16,22 @@ const (
 )
 
 type Driver struct {
+	lvm    *lib.Lvm
 	logger zerolog.Logger
 	sync.Mutex
 }
 
-type DriverConfig struct{}
+type DriverConfig struct {
+	Lvm *lib.Lvm
+}
 
 func NewDriver(cfg DriverConfig) (d Driver, err error) {
+	if cfg.Lvm == nil {
+		err = errors.Errorf("Lvm must be specified")
+		return
+	}
+
+	d.lvm = cfg.Lvm
 	d.logger = zerolog.New(os.Stdout).
 		With().
 		Str("from", "driver").
@@ -55,7 +66,7 @@ func (d Driver) List() (resp *v.ListResponse, err error) {
 	return
 }
 
-func (d Driver) Get(req *v.GetRequest) (resp *v.GetResponse) {
+func (d Driver) Get(req *v.GetRequest) (resp *v.GetResponse, err error) {
 	d.Lock()
 	defer d.Unlock()
 
