@@ -7,6 +7,7 @@ import (
 
 var Rm = cli.Command{
 	Name: "rm",
+	Usage: "removes existing LVM volumes",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "name",

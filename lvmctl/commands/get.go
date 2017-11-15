@@ -6,7 +6,8 @@ import (
 )
 
 var Get = cli.Command{
-	Name: "create",
+	Name: "get",
+	Usage: "inspects existing LVM volumes",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "name",

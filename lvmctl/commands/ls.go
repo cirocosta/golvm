@@ -7,6 +7,7 @@ import (
 
 var Ls = cli.Command{
 	Name: "ls",
+	Usage: "lists existing LVM volumes",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "root, r",

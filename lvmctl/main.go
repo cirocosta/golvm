@@ -13,15 +13,16 @@ var (
 
 func main() {
 	var app = &cli.App{
+		Name:    "lvmctl",
+		Version: version,
+		Usage:   "Controls the 'golvm' volume plugin",
 		Commands: []*cli.Command{
+			&commands.Check,
 			&commands.Create,
 			&commands.Get,
 			&commands.Ls,
 			&commands.Rm,
 		},
-		Name:    "lvmctl",
-		Version: version,
-		Usage:   "Controls the 'golvm' volume plugin",
 	}
 
 	app.Run(os.Args)

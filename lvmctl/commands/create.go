@@ -7,6 +7,7 @@ import (
 
 var Create = cli.Command{
 	Name: "create",
+	Usage: "create an LVM volume",
 	Flags: []cli.Flag{
 		&cli.StringFlag{
 			Name:  "name",
