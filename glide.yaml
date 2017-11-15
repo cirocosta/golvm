@@ -6,3 +6,7 @@ import:
   - assert
   - require
 - package: github.com/docker/go-units
+- package: github.com/docker/go-plugins-helpers
+  version: master
+  subpackages:
+  - volume

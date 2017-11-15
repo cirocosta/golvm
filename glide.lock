@@ -1,8 +1,23 @@
-hash: 4671da5e981442375e490ac4977fa67ebd21df00512c5c3dc52f36138ea2c2c9
-updated: 2017-11-14T21:38:42.146754925-02:00
+hash: c6813e8a7daadbefb9b705589b10b897282ec851f67e0a6263b116b5d956922e
+updated: 2017-11-15T09:32:50.877513686-02:00
 imports:
+- name: github.com/coreos/go-systemd
+  version: d2196463941895ee908e13531a23a39feb9e1243
+  subpackages:
+  - activation
+- name: github.com/docker/go-connections
+  version: 3ede32e2033de7505e6500d6c868c2b9ed9f169d
+  subpackages:
+  - sockets
+- name: github.com/docker/go-plugins-helpers
+  version: bd8c600f0cdd76c7a57ff6aa86bd2b423868c688
+  subpackages:
+  - sdk
+  - volume
 - name: github.com/docker/go-units
   version: f2d77a61e3c169b43402a0a1e84f06daf29b8190
+- name: github.com/Microsoft/go-winio
+  version: 78439966b38d69bf38227fbf57ac8a6fee70f69a
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/rs/zerolog
@@ -14,6 +29,14 @@ imports:
   subpackages:
   - assert
   - require
+- name: golang.org/x/net
+  version: 66aacef3dd8a676686c7ae3716979581e8b03c47
+  subpackages:
+  - proxy
+- name: golang.org/x/sys
+  version: 7ddbeae9ae08c6a06a59597f0c9edbc5ff2444ce
+  subpackages:
+  - windows
 testImports:
 - name: github.com/davecgh/go-spew
   version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9

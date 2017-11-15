@@ -3,6 +3,7 @@ all: install
 fmt:
 	go fmt
 	cd ./lib && go fmt
+	cd ./driver && go fmt
 
 install:
 	go install -v
