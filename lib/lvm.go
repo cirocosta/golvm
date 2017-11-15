@@ -23,7 +23,9 @@ func NewLvm(cfg LvmConfig) (l Lvm, err error) {
 	return
 }
 
-func (l Lvm) PhysicalVolumes() (output []byte, err error) {
+func (l Lvm) ListPhysicalVolumes() (vols []*PhysicalVolume, err error) {
+	var output []byte
+
 	l.logger.Debug().
 		Msg("retrieving physical volumes")
 
@@ -35,6 +37,13 @@ func (l Lvm) PhysicalVolumes() (output []byte, err error) {
 	if err != nil {
 		err = errors.Wrapf(err,
 			"failed to retrieve physical volumes")
+		return
+	}
+
+	vols, err = DecodePhysicalVolumesResponse(output)
+	if err != nil {
+		err = errors.Wrapf(err,
+			"failed to decode physical volumes response")
 		return
 	}
 
