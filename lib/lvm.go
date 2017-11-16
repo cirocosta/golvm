@@ -82,6 +82,32 @@ func DecodePhysicalVolumesResponse(response []byte) (infos []*PhysicalVolume, er
 	return
 }
 
+func (l Lvm) ListVolumeGroups() (vols []*VolumeGroup, err error) {
+	var output []byte
+
+	l.logger.Debug().Msg("retrieving volume groups")
+
+	output, err = l.Run("vgs",
+		"--units=m",
+		"--nosuffix",
+		"--noheadings",
+		"--report-format=json")
+	if err != nil {
+		err = errors.Wrapf(err,
+			"failed to retrieve volume groups")
+		return
+	}
+
+	vols, err = DecodeVolumeGroupsResponse(output)
+	if err != nil {
+		err = errors.Wrapf(err,
+			"failed to devoce volume groups response")
+		return
+	}
+
+	return
+}
+
 // DecodeVolumeGroupsRepsponse takes a JSON response from
 // the execition of the 'vgs' command and returns a slice of
 // VolumeGroup structs.
@@ -114,6 +140,33 @@ func DecodeVolumeGroupsResponse(response []byte) (infos []*VolumeGroup, err erro
 	return
 }
 
+// ListLogicalVolumes retrieves a list of LogicalVolume structs.
+func (l Lvm) ListLogicalVolumes() (vols []*LogicalVolume, err error) {
+	var output []byte
+
+	l.logger.Debug().Msg("retrieving logical volumes")
+
+	output, err = l.Run("lvs",
+		"--units=m",
+		"--nosuffix",
+		"--noheadings",
+		"--report-format=json")
+	if err != nil {
+		err = errors.Wrapf(err,
+			"failed to retrieve logical volumes")
+		return
+	}
+
+	vols, err = DecodeLogicalVolumesResponse(output)
+	if err != nil {
+		err = errors.Wrapf(err,
+			"failed to devoce logical volumes response")
+		return
+	}
+
+	return
+}
+
 // DecodeLogicalVolumesResponse takes a JSON response from
 // the execition of the 'lvs' command and returns a slice of
 // VolumeGroup structs.
@@ -143,40 +196,6 @@ func DecodeLogicalVolumesResponse(response []byte) (infos []*LogicalVolume, err 
 	}
 
 	infos = report.Report[0].Lv
-	return
-}
-
-func (l Lvm) VolumeGroups() (output []byte, err error) {
-	l.logger.Debug().Msg("retrieving volume groups")
-
-	output, err = l.Run("vgs",
-		"--units=m",
-		"--nosuffix",
-		"--noheadings",
-		"--report-format=json")
-	if err != nil {
-		err = errors.Wrapf(err,
-			"failed to retrieve volume groups")
-		return
-	}
-
-	return
-}
-
-// LogicalVolumes retrieves a list of LogicalVolume structs.
-func (l Lvm) LogicalVolumes() (output []byte, err error) {
-	l.logger.Debug().Msg("retrieving logical volumes")
-
-	output, err = l.Run("lvs",
-		"--units=m",
-		"--nosuffix",
-		"--noheadings",
-		"--report-format=json")
-	if err != nil {
-		err = errors.Wrapf(err,
-			"failed to retrieve logical volumes")
-		return
-	}
 	return
 }
 
