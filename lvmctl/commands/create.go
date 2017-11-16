@@ -56,16 +56,24 @@ var Create = cli.Command{
 		}
 
 		if volumegroup == "" {
-			// pick the volume group that best fits
-			//	1.	if size is specified - the one that fits
-			//		and has the lowest amount
-			//		if size NOT specified - pick the one with
-			//		the most free.
+			vgs, err := lvm.ListVolumeGroups()
+			utils.Abort(err)
+
+			vg, err := lib.PickBestVolumeGroup(0, vgs)
+			utils.Abort(err)
+
+			if vg == nil {
+				utils.Abort(errors.Errorf(
+					"didn't find suitable volume group for specified size"))
+			}
+
+			volumegroup = vg.Name
 		}
 
 		args, err = lvm.BuildLogicalVolumeCretionArgs(&lib.LvCreationConfig{
-			Name: name,
-			Size: size,
+			Name:        name,
+			Size:        size,
+			VolumeGroup: volumegroup,
 		})
 		utils.Abort(err)
 

@@ -2,6 +2,7 @@ package lib
 
 import (
 	"github.com/pkg/errors"
+	"strings"
 
 	units "github.com/docker/go-units"
 )
@@ -19,7 +20,9 @@ func MustFromHumanSize(size string) uint64 {
 }
 
 func FromHumanSize(size string) (bytes uint64, err error) {
-	bytesInt, err := units.FromHumanSize(size)
+	size = strings.TrimSpace(size)
+
+	bytesInt, err := units.RAMInBytes(size)
 	if err != nil {
 		err = errors.Wrapf(err,
 			"Couldn't convert string in human size (size=%s) to bytes",
