@@ -5,31 +5,23 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/cirocosta/golvm/lvmctl/utils"
 	"github.com/cirocosta/golvm/lib"
 	"gopkg.in/urfave/cli.v2"
 )
-
-func abort(err error) {
-	if err == nil {
-		return
-	}
-
-	fmt.Printf("ERRORED: %+v\nAborting.\n", err)
-	os.Exit(1)
-}
 
 var Check = cli.Command{
 	Name:  "check",
 	Usage: "checks verifies the environment",
 	Action: func(c *cli.Context) (err error) {
 		lvm, err := lib.NewLvm(lib.LvmConfig{})
-		abort(err)
+		utils.Abort(err)
 
 		w := new(tabwriter.Writer)
 		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
 
 		pvs, err := lvm.ListPhysicalVolumes()
-		abort(err)
+		utils.Abort(err)
 
 		fmt.Println("")
 		fmt.Println("PHYSICAL VOLUMES")
@@ -44,7 +36,7 @@ var Check = cli.Command{
 		w.Flush()
 
 		vgs, err := lvm.ListVolumeGroups()
-		abort(err)
+		utils.Abort(err)
 
 		fmt.Println("")
 		fmt.Println("VOLUME GROUPS")
@@ -58,7 +50,7 @@ var Check = cli.Command{
 		w.Flush()
 
 		lvs, err := lvm.ListLogicalVolumes()
-		abort(err)
+		utils.Abort(err)
 
 		fmt.Println("")
 		fmt.Println("LOGICAL VOLUMES")
