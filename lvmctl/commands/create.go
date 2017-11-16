@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"github.com/cirocosta/golvm/lib"
+	"github.com/cirocosta/golvm/lvmctl/utils"
 	"github.com/pkg/errors"
 	"gopkg.in/urfave/cli.v2"
 )
@@ -36,19 +38,39 @@ var Create = cli.Command{
 	},
 	Action: func(c *cli.Context) (err error) {
 		var (
-			name = c.String("name")
-			// 		size     = c.String("size")
+			name        = c.String("name")
+			size        = c.String("size")
+			volumegroup = c.String("volumegroup")
 			// 		snapshot = c.String("snapshot")
 			// 		thinpool = c.String("thinpool")
 			// 		keyfile  = c.String("keyfile")
-			root = c.String("root")
+			args []string
 		)
 
-		if name == "" || root == "" {
+		lvm, err := lib.NewLvm(lib.LvmConfig{})
+		utils.Abort(err)
+
+		if name == "" {
 			cli.ShowCommandHelp(c, "create")
-			err = errors.Errorf("All parameters must be set.")
-			return
+			utils.Abort(errors.Errorf("Name parameter not set."))
 		}
+
+		if volumegroup == "" {
+			// pick the volume group that best fits
+			//	1.	if size is specified - the one that fits
+			//		and has the lowest amount
+			//		if size NOT specified - pick the one with
+			//		the most free.
+		}
+
+		args, err = lvm.BuildLogicalVolumeCretionArgs(&lib.LvCreationConfig{
+			Name: name,
+			Size: size,
+		})
+		utils.Abort(err)
+
+		err = lvm.CreateLv(args...)
+		utils.Abort(err)
 
 		return
 	},

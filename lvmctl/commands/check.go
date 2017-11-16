@@ -5,8 +5,8 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/cirocosta/golvm/lvmctl/utils"
 	"github.com/cirocosta/golvm/lib"
+	"github.com/cirocosta/golvm/lvmctl/utils"
 	"gopkg.in/urfave/cli.v2"
 )
 

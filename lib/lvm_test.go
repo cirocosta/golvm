@@ -388,3 +388,38 @@ func TestBuildLogicalVolumeCreationArgs(t *testing.T) {
 	}
 
 }
+
+func TestPickBestVolumeGroup(t *testing.T) {
+	var testCases = []struct {
+		desc        string
+		size        float64
+		vols        []*VolumeGroup
+		expected    *VolumeGroup
+		shouldError bool
+	}{
+		{
+			desc:        "nil should error",
+			size:        0,
+			vols:        nil,
+			expected:    nil,
+			shouldError: true,
+		},
+	}
+
+	var (
+		bestVol *VolumeGroup
+		err     error
+	)
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			bestVol, err = PickBestVolumeGroup(tc.size, tc.vols)
+			if tc.shouldError {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+		})
+	}
+}
