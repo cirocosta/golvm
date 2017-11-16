@@ -295,6 +295,67 @@ func TestParseLogicalVolumesOutput(t *testing.T) {
 	}
 }
 
+func TestBuildLogicalVolumeRemovalArgs(t *testing.T) {
+	var testCases = []struct {
+		desc        string
+		cfg         LvRemovalConfig
+		expected    []string
+		shouldError bool
+	}{
+		{
+			desc:        "without a lvName should fail",
+			cfg:         LvRemovalConfig{},
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc: "without a vgName should fail",
+			cfg: LvRemovalConfig{
+				LvName: "lv",
+			},
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc: "works with vg and lv names",
+			cfg: LvRemovalConfig{
+				LvName: "lv",
+				VgName: "vg",
+			},
+			expected: []string{
+				"--force", "vg/lv",
+			},
+			shouldError: false,
+		},
+	}
+
+	var (
+		err  error
+		l    Lvm
+		args []string
+	)
+
+	l, err = NewLvm(LvmConfig{})
+	require.NoError(t, err)
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			args, err = l.BuildLogicalVolumeRemovalArgs(tc.cfg)
+			if tc.shouldError {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			require.Equal(t, len(tc.expected), len(args))
+			for ndx, arg := range args {
+				assert.Equal(t, tc.expected[ndx], arg)
+			}
+		})
+	}
+
+}
+
 func TestBuildLogicalVolumeCreationArgs(t *testing.T) {
 	var testCases = []struct {
 		desc        string

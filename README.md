@@ -76,3 +76,11 @@ lvmctl \
 
 ps.: Snapshots of encrypted volumes use the same key file. The key file must be present when the volume is created, and when it is mounted to a container.
 
+
+## Docker Plugin
+
+
+## TODO
+
+- check if the LV will conflict prior to the creation
+

@@ -338,8 +338,33 @@ func (l Lvm) BuildLogicalVolumeCretionArgs(cfg *LvCreationConfig) (args []string
 	return
 }
 
+type LvRemovalConfig struct {
+	LvName string
+	VgName string
+}
+
 // DeleteLogicalVolume deletes a logical volume if it exists
-func (l Lvm) DeleteLogicalVolume(def *LogicalVolume) (err error) {
+func (l Lvm) BuildLogicalVolumeRemovalArgs(cfg LvRemovalConfig) (args []string, err error) {
+	if cfg.LvName == "" {
+		err = errors.Errorf(
+			"the logical volume name must be specified")
+		return
+	}
+
+	if cfg.VgName == "" {
+		err = errors.Errorf(
+			"the volume group name must be specified")
+		return
+	}
+
+	args = []string{"--force", cfg.VgName + "/" + cfg.LvName}
+	return
+}
+
+// CreateLv runs the 'lvremove' command with
+// the arguments provided.
+func (l Lvm) RemoveLv(args ...string) (err error) {
+	_, err = l.Run("lvremove", args...)
 	return
 }
 
