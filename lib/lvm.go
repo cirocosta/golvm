@@ -35,6 +35,15 @@ func PickBestVolumeGroup(size float64, vols []*VolumeGroup) (bestVol *VolumeGrou
 
 	for _, vol := range vols {
 		if vol.Free > size {
+			if bestVol == nil {
+				bestVol = vol
+				continue
+			}
+
+			if bestVol.Free > vol.Free {
+				continue
+			}
+
 			bestVol = vol
 		}
 	}

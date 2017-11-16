@@ -404,6 +404,67 @@ func TestPickBestVolumeGroup(t *testing.T) {
 			expected:    nil,
 			shouldError: true,
 		},
+		{
+			desc:        "should return nil if empty list",
+			size:        0,
+			vols:        []*VolumeGroup{},
+			expected:    nil,
+			shouldError: false,
+		},
+		{
+			desc: "should return the most free of all if 0",
+			size: 0,
+			vols: []*VolumeGroup{
+				&VolumeGroup{
+					Name: "vg1",
+					Size: 30,
+					Free: 10,
+				},
+				&VolumeGroup{
+					Name: "vg2",
+					Size: 30,
+					Free: 20,
+				},
+				&VolumeGroup{
+					Name: "vg3",
+					Size: 30,
+					Free: 5,
+				},
+			},
+			expected: &VolumeGroup{
+				Name: "vg2",
+				Size: 30,
+				Free: 20,
+			},
+			shouldError: false,
+		},
+		{
+			desc: "should return the most free suiting size > 0",
+			size: 15,
+			vols: []*VolumeGroup{
+				&VolumeGroup{
+					Name: "vg1",
+					Size: 60,
+					Free: 10,
+				},
+				&VolumeGroup{
+					Name: "vg2",
+					Size: 60,
+					Free: 20,
+				},
+				&VolumeGroup{
+					Name: "vg3",
+					Size: 60,
+					Free: 50,
+				},
+			},
+			expected: &VolumeGroup{
+				Name: "vg3",
+				Size: 60,
+				Free: 50,
+			},
+			shouldError: false,
+		},
 	}
 
 	var (
@@ -420,6 +481,11 @@ func TestPickBestVolumeGroup(t *testing.T) {
 			}
 
 			require.NoError(t, err)
+			if tc.expected != nil {
+				assert.Equal(t, tc.expected.Name, bestVol.Name)
+			} else {
+				assert.Nil(t, bestVol)
+			}
 		})
 	}
 }
