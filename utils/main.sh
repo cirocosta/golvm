@@ -6,6 +6,7 @@ readonly IMAGES_DIR="/images"
 
 main() {
 	setup_images_dir
+	create_vg "0"
 	create_vg "1"
 	create_vg "2"
 }

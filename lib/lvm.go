@@ -23,6 +23,10 @@ func NewLvm(cfg LvmConfig) (l Lvm, err error) {
 	return
 }
 
+func ParseLvAttr(attr string) (parsedAttr *LvAttr, err error) {
+	return
+}
+
 // PickBestVolumeGroup picks the volume group that best
 // accomodates a given size.
 // 'size' specifies the size to be accomodated - if 0, any

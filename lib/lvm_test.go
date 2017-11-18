@@ -550,3 +550,24 @@ func TestPickBestVolumeGroup(t *testing.T) {
 		})
 	}
 }
+
+func TestParseLvAttr(t *testing.T) {
+	var testCases = []struct {
+		desc        string
+		input       string
+		expected    *LvAttr
+		shouldError bool
+	}{
+		{
+			desc:        "empty",
+			input:       "",
+			expected:    nil,
+			shouldError: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+		})
+	}
+}

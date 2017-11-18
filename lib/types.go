@@ -51,3 +51,7 @@ type LogicalVolume struct {
 	PoolLv          string  `json:"pool_lv"`
 	VgName          string  `json:"vg_name"`
 }
+
+type LvAttr struct {
+	IsThin bool
+}

@@ -21,6 +21,7 @@ func main() {
 			&commands.Create,
 			&commands.Get,
 			&commands.Ls,
+			&commands.Resize,
 			&commands.Rm,
 		},
 	}

@@ -12,7 +12,7 @@ import (
 
 var Check = cli.Command{
 	Name:  "check",
-	Usage: "checks verifies the environment",
+	Usage: "verifies the environment by dumping all that was found",
 	Action: func(c *cli.Context) (err error) {
 		lvm, err := lib.NewLvm(lib.LvmConfig{})
 		utils.Abort(err)

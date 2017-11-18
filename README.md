@@ -79,6 +79,12 @@ ps.: Snapshots of encrypted volumes use the same key file. The key file must be 
 
 ## Docker Plugin
 
+1.      Whitelist volume groups to be used
+
+```
+echo "myvg" >> /etc/docker/golvm
+```
+
 
 ## TODO
 
