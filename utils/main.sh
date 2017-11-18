@@ -6,9 +6,10 @@ readonly IMAGES_DIR="/images"
 
 main() {
 	setup_images_dir
-	create_vg "0"
-	create_vg "1"
-	create_vg "2"
+
+	setup_device 0
+	create_pv 0
+	create_vg 0
 }
 
 setup_images_dir() {
@@ -23,34 +24,64 @@ setup_images_dir() {
 	fi
 }
 
-create_vg() {
+setup_device() {
 	local number=$1
-
-	if [[ -z "$number" ]]; then
-		echo "ERROR:
-    create_vg expects an argument (number).
-
-  Aborting.
-  "
-		exit 1
-	fi
-
 	local device=/dev/loop$number
 	local image=$IMAGES_DIR/lvm$number.img
-	local vg_name=volgroup$number
 
-	echo "INFO:
-  Starting to set up vg.
-
-  DEVICE:   $device
-  IMAGE:    $image
+	echo "INFO: Setting up device
+  NUMBER: $number
+  DEVICE: $device
+  IMAGE:  $image
   "
+
+	test -z "$number" &&
+		{
+			echo "a device number must be specified"
+			exit 1
+		}
 
 	dd if=/dev/zero of=$image bs=1M count=50
 	losetup $device $image
+}
+
+create_pv() {
+	local number=$1
+	local device=/dev/loop$number
+
+	echo "INFO: Preparing physical volume
+  NUMBER: $number
+  DEVICE: $device
+  "
+
+	test -z "$number" &&
+		{
+			echo "a device number must be specified"
+			exit 1
+		}
+
 	echo ",,8e,," | sfdisk $device
 	partx --update $device
 	pvcreate $device
+}
+
+create_vg() {
+	local number=$1
+	local device=/dev/loop$number
+	local vg_name=volgroup$number
+
+	echo "INFO: Preparing volume group
+  NUMBER: $number
+  DEVICE: $device
+  VG_NAME:$vg_name
+  "
+
+	test -z "$number" &&
+		{
+			echo "a device number must be specified"
+			exit 1
+		}
+
 	vgcreate $vg_name $device
 }
 
