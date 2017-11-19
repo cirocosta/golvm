@@ -17,7 +17,7 @@ install:
 	cd ./lvmctl && go install -v
 
 test:
-	cd ./lib && go test -v
+	cd ./lib && go test
 
 rootfs-image:
 	docker build -t $(ROOTFS_IMAGE) .

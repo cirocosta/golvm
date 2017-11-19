@@ -40,6 +40,12 @@ lvmctl create \
 2. 	Create a thinly-provisioned lvm volume named `thin_vol` in `mythinpool`
 
 ```sh
+
+sudo lvcreate \
+        --size 20M \
+        --thin \
+        volgroup0/thinpool0
+
 lvmctl create \
 	--size=10M \
 	--thinpool=mythinpool \
