@@ -96,21 +96,30 @@ func (d Driver) Create(req *v.CreateRequest) (err error) {
 }
 
 func (d Driver) List() (resp *v.ListResponse, err error) {
+	var vols []*lib.LogicalVolume
+
 	d.Lock()
 	defer d.Unlock()
 
 	d.logger.Debug().
 		Msg("listing volumes")
 
-	// lists all volumes that were created by the volume plugin
+	vols, err = d.lvm.ListLogicalVolumes()
+	if err != nil {
+		err = errors.Wrapf(err, "couldn't list volumes")
+		return
+	}
 
-	//        resp.Volumes = make([]*v.Volume, len(dirs))
-	//        for idx, dir := range dirs {
-	//        	resp.Volumes[idx] = &v.Volume{
-	//        		Name: dir,
-	//        	}
-	//        }
+	var volumesList = make([]*v.Volume, 0)
+	for _, vol := range vols {
+		volumesList = append(volumesList, &v.Volume{
+			Name: vol.LvName,
+		})
+	}
 
+	resp = &v.ListResponse{
+		Volumes: volumesList,
+	}
 	return
 }
 
