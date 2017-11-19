@@ -14,7 +14,10 @@ type Lvm struct {
 	logger zerolog.Logger
 }
 
-type LvmConfig struct{}
+// LvmConfig provides the configuration details for
+// the Lvm helper.
+type LvmConfig struct {
+}
 
 func NewLvm(cfg LvmConfig) (l Lvm, err error) {
 	l.logger = zerolog.New(os.Stdout).With().
@@ -287,13 +290,12 @@ func DecodeLogicalVolumesResponse(response []byte) (infos []*LogicalVolume, err 
 }
 
 type LvCreationConfig struct {
-	Name            string
-	Size            string
-	Snapshot        string
-	KeyFile         string
-	ThinPool        string
-	VolumeGroup     string
-	ThinVolumeGroup string
+	Name        string
+	Size        string
+	Snapshot    string
+	KeyFile     string
+	ThinPool    string
+	VolumeGroup string
 }
 
 // CreateLogicalVolume creates a logical volume using the definition passed.
@@ -449,11 +451,11 @@ func (l Lvm) Run(name string, args ...string) (out []byte, err error) {
 	cmd := exec.Command(name, args...)
 	cmd.Env = append(os.Environ(), "LC_NUMERIC=en_US.UTF-8")
 
-	out, err = cmd.Output()
+	out, err = cmd.CombinedOutput()
 	if err != nil {
 		err = errors.Wrapf(err,
-			"failed to execute command %s with args %+v",
-			name, args)
+			"failed to execute command '%s' with args '%+v'. Output:\n%s\n",
+			name, args, string(out))
 		return
 	}
 

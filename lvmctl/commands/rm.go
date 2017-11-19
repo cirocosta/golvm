@@ -32,8 +32,7 @@ var Rm = cli.Command{
 
 		if name == "" || volumegroup == "" {
 			cli.ShowCommandHelp(c, "rm")
-			err = errors.Errorf("All parameters must be set.")
-			return
+			utils.Abort(errors.Errorf("All parameters must be set."))
 		}
 
 		args, err = lvm.BuildLogicalVolumeRemovalArgs(lib.LvRemovalConfig{

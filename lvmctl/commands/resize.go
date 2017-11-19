@@ -21,13 +21,17 @@ var Resize = cli.Command{
 	Action: func(c *cli.Context) (err error) {
 		var (
 			name = c.String("name")
+			size = c.String("size")
 		)
 
-		if name == "" {
+		if name == "" || size == "" {
 			cli.ShowCommandHelp(c, "resize")
 			err = errors.Errorf("All parameters must be set.")
 			return
 		}
+
+		//	1.	get the desired size
+		//	2.	check if exists;
 
 		return
 	},

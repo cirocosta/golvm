@@ -378,7 +378,7 @@ func TestBuildLogicalVolumeCreationArgs(t *testing.T) {
 			shouldError: true,
 		},
 		{
-			desc: "fails with only name and vg ",
+			desc: "fails with only name and vg",
 			cfg: &LvCreationConfig{
 				Name:        "name",
 				VolumeGroup: "volumegroup",
@@ -418,6 +418,23 @@ func TestBuildLogicalVolumeCreationArgs(t *testing.T) {
 				"--name", "name",
 				"--size", "22M",
 				"volumegroup",
+			},
+			shouldError: false,
+		},
+		{
+			desc: "thin vol works with name, thinpool, size and vg",
+			cfg: &LvCreationConfig{
+				Name:        "name",
+				VolumeGroup: "volumegroup",
+				Size:        "22M",
+				ThinPool:    "tp",
+			},
+			expected: []string{
+				"--setactivationskip", "n",
+				"--name", "name",
+				"--virtualsize", "22M",
+				"--thin",
+				"volumegroup/tp",
 			},
 			shouldError: false,
 		},

@@ -14,7 +14,8 @@
     "Linux": {
         "Capabilities": [
             "CAP_SYS_ADMIN"
-        ]
+        ],
+        "AllowAllDevices": true
     },
     "Mounts": [
         {
@@ -23,6 +24,14 @@
                 "bind"
             ],
             "Source": "/mnt",
+            "Type": "bind"
+        },
+        {
+            "Destination": "/dev",
+            "Options": [
+                "bind"
+            ],
+            "Source": "/dev",
             "Type": "bind"
         }
     ],

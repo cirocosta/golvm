@@ -20,6 +20,10 @@ var Create = cli.Command{
 			Usage: "Maximum size of the volume",
 		},
 		&cli.StringFlag{
+			Name:  "volumegroup",
+			Usage: "Volume group to use",
+		},
+		&cli.StringFlag{
 			Name:  "thinpool",
 			Usage: "Name of the thinpool to base the volume",
 		},
@@ -41,10 +45,10 @@ var Create = cli.Command{
 			name        = c.String("name")
 			size        = c.String("size")
 			volumegroup = c.String("volumegroup")
-			// 		snapshot = c.String("snapshot")
-			// 		thinpool = c.String("thinpool")
-			// 		keyfile  = c.String("keyfile")
-			args []string
+			thinpool    = c.String("thinpool")
+			snapshot    = c.String("snapshot")
+			keyfile     = c.String("keyfile")
+			args        []string
 		)
 
 		lvm, err := lib.NewLvm(lib.LvmConfig{})
@@ -74,6 +78,9 @@ var Create = cli.Command{
 			Name:        name,
 			Size:        size,
 			VolumeGroup: volumegroup,
+			Snapshot:    snapshot,
+			ThinPool:    thinpool,
+			KeyFile:     keyfile,
 		})
 		utils.Abort(err)
 

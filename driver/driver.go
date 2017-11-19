@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	HostMountPoint = "/mnt/lvmvol"
+	HostMountPoint            = "/mnt/lvmvol"
+	VolumeGroupsWhiteListFile = "/mnt/lvmvol/whitelist"
 )
 
 type Driver struct {
@@ -31,11 +32,13 @@ func NewDriver(cfg DriverConfig) (d Driver, err error) {
 		return
 	}
 
-	d.lvm = cfg.Lvm
 	d.logger = zerolog.New(os.Stdout).
 		With().
 		Str("from", "driver").
 		Logger()
+
+	d.lvm = cfg.Lvm
+	d.logger.Info().Msg("driver initialized")
 
 	return
 }
@@ -85,12 +88,19 @@ func (d Driver) Create(req *v.CreateRequest) (err error) {
 		return
 	}
 
+	d.logger.Debug().
+		Str("name", req.Name).
+		Msg("finished creation")
+
 	return
 }
 
 func (d Driver) List() (resp *v.ListResponse, err error) {
 	d.Lock()
 	defer d.Unlock()
+
+	d.logger.Debug().
+		Msg("listing volumes")
 
 	// lists all volumes that were created by the volume plugin
 
@@ -147,8 +157,11 @@ func (d Driver) Unmount(req *v.UnmountRequest) (err error) {
 }
 
 func (d Driver) Capabilities() (resp *v.CapabilitiesResponse) {
-	resp.Capabilities = v.Capability{
-		Scope: "global",
+	resp = &v.CapabilitiesResponse{
+		Capabilities: v.Capability{
+			Scope: "global",
+		},
 	}
+
 	return
 }
