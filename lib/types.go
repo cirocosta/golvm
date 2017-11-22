@@ -1,5 +1,33 @@
 package lib
 
+import (
+	"github.com/rs/zerolog"
+)
+
+// Lvm encapsulates a series of methods for
+// dealing with LVM management.
+// It's mostly stateless except for a logger.
+type Lvm struct {
+	logger zerolog.Logger
+}
+
+// LvmConfig provides the configuration details for
+// the Lvm helper.
+type LvmConfig struct{}
+
+// LvCreationConfig is a simplified configuration
+// struct to be passed to logical volume creation
+// methods.
+type LvCreationConfig struct {
+	Name        string
+	Size        string
+	Snapshot    string
+	KeyFile     string
+	ThinPool    string
+	VolumeGroup string
+	FsType      string
+}
+
 type PhysicalVolumesReport struct {
 	Report []struct {
 		Pv []*PhysicalVolume `json:"pv"`
@@ -159,6 +187,11 @@ var (
 		lvAttrSkipActivationMap,
 	}
 )
+
+type LvRemovalConfig struct {
+	LvName string
+	VgName string
+}
 
 type LvAttr struct {
 	VolumeType                string

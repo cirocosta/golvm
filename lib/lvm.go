@@ -10,17 +10,6 @@ import (
 	"github.com/rs/zerolog"
 )
 
-// Lvm encapsulates a series of methods for
-// dealing with LVM management.
-// It's mostly stateless except for a logger.
-type Lvm struct {
-	logger zerolog.Logger
-}
-
-// LvmConfig provides the configuration details for
-// the Lvm helper.
-type LvmConfig struct{}
-
 func NewLvm(cfg LvmConfig) (l Lvm, err error) {
 	l.logger = zerolog.New(os.Stdout).With().
 		Str("from", "lvm").
@@ -303,19 +292,6 @@ func DecodeLogicalVolumesResponse(response []byte) (infos []*LogicalVolume, err 
 	return
 }
 
-// LvCreationConfig is a simplified configuration
-// struct to be passed to logical volume creation
-// methods.
-type LvCreationConfig struct {
-	Name        string
-	Size        string
-	Snapshot    string
-	KeyFile     string
-	ThinPool    string
-	VolumeGroup string
-	FsType      string
-}
-
 // BuildVolumeMountArgs builds a list of arguments to
 // be used on the 'mount' command to properly mount
 // a given device to a location in the filesystem hierarchy.
@@ -459,11 +435,6 @@ func (l Lvm) BuildLogicalVolumeCretionArgs(cfg *LvCreationConfig) (args []string
 	}
 
 	return
-}
-
-type LvRemovalConfig struct {
-	LvName string
-	VgName string
 }
 
 // DeleteLogicalVolume deletes a logical volume if it exists
