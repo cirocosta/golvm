@@ -10,6 +10,9 @@ import (
 	"github.com/rs/zerolog"
 )
 
+// Lvm encapsulates a series of methods for
+// dealing with LVM management.
+// It's mostly stateless except for a logger.
 type Lvm struct {
 	logger zerolog.Logger
 }
@@ -26,6 +29,10 @@ func NewLvm(cfg LvmConfig) (l Lvm, err error) {
 	return
 }
 
+// ParseLvAttr takes an 'attr' string from 'lvs' command and
+// parses it so that it can be consumed via the LvAttr struct.
+// In case of any unexpected tokens or malformed attr, fails
+// with an error.
 func ParseLvAttr(attr string) (parsedAttr *LvAttr, err error) {
 	if attr == "" {
 		err = errors.Errorf("attr must not be empty")
@@ -112,6 +119,10 @@ func PickBestVolumeGroup(size float64, vols []*VolumeGroup) (bestVol *VolumeGrou
 	return
 }
 
+// ListPhysicalVolumes gathers a list of all the physical
+// volumes that can be found by the LVM controller.
+// It parses the output from the `pvs` command and returns
+// a list of PhysicalVolume structs.
 func (l Lvm) ListPhysicalVolumes() (vols []*PhysicalVolume, err error) {
 	var output []byte
 
@@ -171,6 +182,9 @@ func DecodePhysicalVolumesResponse(response []byte) (infos []*PhysicalVolume, er
 	return
 }
 
+// ListVolumeGroups lists all groups that can be reached
+// by the LVM controller. As a result it parses the response
+// of the 'vgs' command and returns a list of VolumeGroup structs.
 func (l Lvm) ListVolumeGroups() (vols []*VolumeGroup, err error) {
 	var output []byte
 
@@ -229,7 +243,8 @@ func DecodeVolumeGroupsResponse(response []byte) (infos []*VolumeGroup, err erro
 	return
 }
 
-// ListLogicalVolumes retrieves a list of LogicalVolume structs.
+// ListLogicalVolumes retrieves a list of LogicalVolume structs
+// from the result of parsing the response of the 'lvs' command.
 func (l Lvm) ListLogicalVolumes() (vols []*LogicalVolume, err error) {
 	var output []byte
 
@@ -288,6 +303,9 @@ func DecodeLogicalVolumesResponse(response []byte) (infos []*LogicalVolume, err 
 	return
 }
 
+// LvCreationConfig is a simplified configuration
+// struct to be passed to logical volume creation
+// methods.
 type LvCreationConfig struct {
 	Name        string
 	Size        string
@@ -298,6 +316,9 @@ type LvCreationConfig struct {
 	FsType      string
 }
 
+// BuildVolumeMountArgs builds a list of arguments to
+// be used on the 'mount' command to properly mount
+// a given device to a location in the filesystem hierarchy.
 func (l Lvm) BuildVolumeMountArgs(location string) (err error) {
 	if location == "" {
 		err = errors.Errorf("a location must be specified")
@@ -307,6 +328,11 @@ func (l Lvm) BuildVolumeMountArgs(location string) (err error) {
 	return
 }
 
+// BuildMakeFsArgs builds a list of arguments to be used
+// on the 'mkfs' command to properly create a filesystem on
+// a device. It supports two types of FS:
+//	-	xfs
+//	-	ext4
 func (l Lvm) BuildMakeFsArgs(fsType, device string) (args []string, err error) {
 	if fsType == "" || device == "" {
 		err = errors.Errorf("both fstype and device must be specified")
@@ -328,8 +354,7 @@ func (l Lvm) BuildMakeFsArgs(fsType, device string) (args []string, err error) {
 	return
 }
 
-// MakeFs runs the 'mkfs' command with
-// the arguments provided.
+// MakeFs runs the 'mkfs' command with the arguments provided.
 func (l Lvm) MakeFs(args ...string) (err error) {
 	_, err = l.Run("mkfs", args...)
 	return
