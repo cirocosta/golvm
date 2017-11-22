@@ -5,13 +5,17 @@ import (
 
 	"github.com/cirocosta/golvm/driver"
 	"github.com/cirocosta/golvm/lib"
+	"github.com/cirocosta/golvm/lvmctl/utils"
 	"github.com/rs/zerolog"
 
 	v "github.com/docker/go-plugins-helpers/volume"
 )
 
 const (
-	socketAddress = "/run/docker/plugins/golvm.sock"
+	socketAddress   = "/run/docker/plugins/golvm.sock"
+	volumeMountRoot = "/mnt"
+	hostMountPoint  = "/mnt/lvmvol"
+	vgWhitelistFile = "/mnt/lvmvol/whitelist"
 )
 
 var (
@@ -24,22 +28,19 @@ var (
 
 func main() {
 	l, err := lib.NewLvm(lib.LvmConfig{})
-	if err != nil {
-		logger.Error().
-			Err(err).
-			Msg("failed to initialize lvm manager")
-		os.Exit(1)
-	}
+	utils.Abort(err)
+
+	dm, err := driver.NewDirManager(driver.DirManagerConfig{
+		Root: volumeMountRoot,
+	})
+	utils.Abort(err)
 
 	d, err := driver.NewDriver(driver.DriverConfig{
-		Lvm: &l,
+		Lvm:             &l,
+		DirManager:      &dm,
+		VgWhitelistFile: vgWhitelistFile,
 	})
-	if err != nil {
-		logger.Error().
-			Err(err).
-			Msg("failed to initialize lvm volume driver")
-		os.Exit(1)
-	}
+	utils.Abort(err)
 
 	handler := v.NewHandler(d)
 
@@ -49,10 +50,5 @@ func main() {
 		Msg("listening on unix socket")
 
 	err = handler.ServeUnix(socketAddress, 0)
-	if err != nil {
-		logger.Error().
-			Err(err).
-			Msg("errored serving on unix socket")
-		os.Exit(1)
-	}
+	utils.Abort(err)
 }

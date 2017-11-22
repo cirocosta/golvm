@@ -11,20 +11,18 @@ import (
 	v "github.com/docker/go-plugins-helpers/volume"
 )
 
-const (
-	HostMountPoint            = "/mnt/lvmvol"
-	VolumeGroupsWhiteListFile = "/mnt/lvmvol/whitelist"
-)
-
 type Driver struct {
 	lvm         *lib.Lvm
+	dirManager  *DirManager
 	logger      zerolog.Logger
 	vgWhiteList []string
 	sync.Mutex
 }
 
 type DriverConfig struct {
-	Lvm *lib.Lvm
+	Lvm             *lib.Lvm
+	DirManager      *DirManager
+	VgWhitelistFile string
 }
 
 func NewDriver(cfg DriverConfig) (d Driver, err error) {
@@ -35,18 +33,27 @@ func NewDriver(cfg DriverConfig) (d Driver, err error) {
 		return
 	}
 
+	if cfg.DirManager == nil {
+		err = errors.Errorf("DirManager must be specified")
+		return
+	}
+
+	if cfg.VgWhitelistFile == "" {
+		err = errors.Errorf("a VgWhitelistFile must be specified")
+		return
+	}
+
 	d.logger = zerolog.New(os.Stdout).
 		With().
 		Str("from", "driver").
 		Logger()
 
-	whitelist, err = ReadVgWhitelist(VolumeGroupsWhiteListFile)
+	whitelist, err = ReadVgWhitelist(cfg.VgWhitelistFile)
 	if err != nil {
 		d.logger.Error().
 			Err(err).
-			Str("file", VolumeGroupsWhiteListFile).
+			Str("file", cfg.VgWhitelistFile).
 			Msg("couldn't read vgs from whitelist file")
-		return
 	}
 
 	for _, vg := range whitelist {
@@ -56,6 +63,7 @@ func NewDriver(cfg DriverConfig) (d Driver, err error) {
 	}
 
 	d.lvm = cfg.Lvm
+	d.dirManager = cfg.DirManager
 	d.vgWhiteList = whitelist
 	d.logger.Info().Msg("driver initialized")
 

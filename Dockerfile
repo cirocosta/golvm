@@ -2,6 +2,7 @@ FROM golang:alpine as builder
 
 ADD ./VERSION /go/src/github.com/cirocosta/golvm/VERSION
 ADD ./main.go /go/src/github.com/cirocosta/golvm/main.go
+ADD ./lvmctl /go/src/github.com/cirocosta/golvm/lvmctl
 ADD ./vendor /go/src/github.com/cirocosta/golvm/vendor
 ADD ./driver /go/src/github.com/cirocosta/golvm/driver
 ADD ./lib /go/src/github.com/cirocosta/golvm/lib
