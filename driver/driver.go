@@ -151,10 +151,11 @@ func (d Driver) Get(req *v.GetRequest) (resp *v.GetResponse, err error) {
 	d.Lock()
 	defer d.Unlock()
 
-	// resp.Volume = &v.Volume{
-	// 	Name:       req.Name,
-	// 	Mountpoint: mp,
-	// }
+	resp = &v.GetResponse{
+		Volume: &v.Volume{
+			Name: req.Name,
+		},
+	}
 
 	return
 }

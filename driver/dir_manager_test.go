@@ -206,3 +206,47 @@ func TestDelete_failsForInexistentVolume(t *testing.T) {
 	err = m.Delete("abc")
 	assert.Error(t, err)
 }
+
+func TestMountpoint(t *testing.T) {
+	dir, err := ioutil.TempDir("", "")
+	assert.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	var testCases = []struct {
+		desc        string
+		input       string
+		expected    string
+		shouldError bool
+	}{
+		{
+			desc:        "fail if empty",
+			input:       "",
+			shouldError: true,
+		},
+		{
+			desc:        "work if not empty and valid",
+			input:       "aa",
+			expected:    path.Join(dir, "aa"),
+			shouldError: false,
+		},
+	}
+
+	m, err := NewDirManager(DirManagerConfig{
+		Root: dir,
+	})
+	assert.NoError(t, err)
+
+	var mp string
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			mp, err = m.Mountpoint(tc.input)
+			if tc.shouldError {
+				assert.Error(t, err)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.Equal(t, tc.expected, mp)
+		})
+	}
+}

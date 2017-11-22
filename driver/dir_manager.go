@@ -50,6 +50,23 @@ func NewDirManager(cfg DirManagerConfig) (manager DirManager, err error) {
 	return
 }
 
+// Mountpoint retrieves the full mountpoint that a
+// given 'name' can receive.
+func (m DirManager) Mountpoint(name string) (mp string, err error) {
+	if name == "" {
+		err = errors.Errorf("a name must be provided")
+		return
+	}
+
+	if !isValidName(name) {
+		err = ErrInvalidName
+		return
+	}
+
+	mp = filepath.Join(m.root, name)
+	return
+}
+
 func (m DirManager) List() (directories []string, err error) {
 	files, err := ioutil.ReadDir(m.root)
 	if err != nil {
@@ -92,12 +109,13 @@ func (m DirManager) Get(name string) (absPath string, found bool, err error) {
 }
 
 func (m DirManager) Create(path string) (absPath string, err error) {
-	if !isValidName(path) {
-		err = ErrInvalidName
+	absPath, err = m.Mountpoint(path)
+	if err != nil {
+		err = errors.Wrapf(err,
+			"Couldn't retrieve full name for path %s", path)
 		return
 	}
 
-	absPath = filepath.Join(m.root, path)
 	err = os.MkdirAll(absPath, 0755)
 	if err != nil {
 		err = errors.Wrapf(err,
