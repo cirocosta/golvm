@@ -296,6 +296,44 @@ type LvCreationConfig struct {
 	KeyFile     string
 	ThinPool    string
 	VolumeGroup string
+	FsType      string
+}
+
+func (l Lvm) BuildVolumeMountArgs(location string) (err error) {
+	if location == "" {
+		err = errors.Errorf("a location must be specified")
+		return
+	}
+
+	return
+}
+
+func (l Lvm) BuildMakeFsArgs(fsType, device string) (args []string, err error) {
+	if fsType == "" || device == "" {
+		err = errors.Errorf("both fstype and device must be specified")
+		return
+	}
+
+	args = []string{"-t"}
+
+	switch fsType {
+	case "ext4":
+	case "xfs":
+	default:
+		err = errors.Errorf("unsupported fs type %s", fsType)
+		return
+	}
+
+	args = append(args, fsType, device)
+
+	return
+}
+
+// MakeFs runs the 'mkfs' command with
+// the arguments provided.
+func (l Lvm) MakeFs(args ...string) (err error) {
+	_, err = l.Run("mkfs", args...)
+	return
 }
 
 // CreateLogicalVolume creates a logical volume using the definition passed.

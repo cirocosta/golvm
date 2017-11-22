@@ -43,7 +43,10 @@ func NewDriver(cfg DriverConfig) (d Driver, err error) {
 
 	whitelist, err = ReadVgWhitelist(VolumeGroupsWhiteListFile)
 	if err != nil {
-		err = errors.Wrapf(err, "couldn't read vgs from whitelist file")
+		d.logger.Error().
+			Err(err).
+			Str("file", VolumeGroupsWhiteListFile).
+			Msg("couldn't read vgs from whitelist file")
 		return
 	}
 
@@ -91,6 +94,8 @@ func ReadVgWhitelist(filename string) (vgs []string, err error) {
 	return
 }
 
+// Create creates a new logical volume if it doesn't
+// exist yet.
 func (d Driver) Create(req *v.CreateRequest) (err error) {
 	var (
 		size        string

@@ -295,6 +295,86 @@ func TestParseLogicalVolumesOutput(t *testing.T) {
 	}
 }
 
+func TestBuildMakeFsArgs(t *testing.T) {
+	var testCases = []struct {
+		desc        string
+		fsType      string
+		device      string
+		expected    []string
+		shouldError bool
+	}{
+		{
+			desc:        "fail with empty fstype",
+			fsType:      "",
+			device:      "",
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc:        "fail with empty device",
+			fsType:      "ext4",
+			device:      "",
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc:        "fail with unknown fstype",
+			fsType:      "unknown",
+			device:      "/dev/device",
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc:   "works with ext4",
+			fsType: "ext4",
+			device: "/dev/device",
+			expected: []string{
+				"-t",
+				"ext4",
+				"/dev/device",
+			},
+			shouldError: false,
+		},
+		{
+			desc:   "works with xfs",
+			fsType: "xfs",
+			device: "/dev/device",
+			expected: []string{
+				"-t",
+				"xfs",
+				"/dev/device",
+			},
+			shouldError: false,
+		},
+	}
+
+	var (
+		err error
+		l    Lvm
+		args []string
+	)
+
+
+	l, err = NewLvm(LvmConfig{})
+	require.NoError(t, err)
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			args, err = l.BuildMakeFsArgs(tc.fsType, tc.device)
+			if tc.shouldError {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			require.Equal(t, len(tc.expected), len(args))
+			for ndx, arg := range args {
+				assert.Equal(t, tc.expected[ndx], arg)
+			}
+		})
+	}
+}
+
 func TestBuildLogicalVolumeRemovalArgs(t *testing.T) {
 	var testCases = []struct {
 		desc        string
@@ -353,7 +433,6 @@ func TestBuildLogicalVolumeRemovalArgs(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestBuildLogicalVolumeCreationArgs(t *testing.T) {
