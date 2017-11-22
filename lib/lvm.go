@@ -16,8 +16,7 @@ type Lvm struct {
 
 // LvmConfig provides the configuration details for
 // the Lvm helper.
-type LvmConfig struct {
-}
+type LvmConfig struct{}
 
 func NewLvm(cfg LvmConfig) (l Lvm, err error) {
 	l.logger = zerolog.New(os.Stdout).With().

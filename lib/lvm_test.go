@@ -349,11 +349,10 @@ func TestBuildMakeFsArgs(t *testing.T) {
 	}
 
 	var (
-		err error
+		err  error
 		l    Lvm
 		args []string
 	)
-
 
 	l, err = NewLvm(LvmConfig{})
 	require.NoError(t, err)
