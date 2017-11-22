@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"bufio"
 	"os"
 	"sync"
 
@@ -63,37 +62,6 @@ func NewDriver(cfg DriverConfig) (d Driver, err error) {
 	return
 }
 
-func ReadVgWhitelist(filename string) (vgs []string, err error) {
-	var (
-		file *os.File
-	)
-
-	file, err = os.Open(filename)
-	if err != nil {
-		err = errors.Wrapf(err,
-			"can't open whitelist file %s", filename)
-		return
-	}
-	defer file.Close()
-
-	vgs = make([]string, 0)
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		vgs = append(vgs, scanner.Text())
-	}
-
-	err = scanner.Err()
-	if err != nil {
-		err = errors.Wrapf(err,
-			"failed to read whitelist %s lines",
-			filename)
-		return
-	}
-
-	return
-}
-
 // Create creates a new logical volume if it doesn't
 // exist yet.
 func (d Driver) Create(req *v.CreateRequest) (err error) {
@@ -103,6 +71,7 @@ func (d Driver) Create(req *v.CreateRequest) (err error) {
 		snapshot    string
 		keyfile     string
 		volumegroup string
+		fstype      string
 		args        []string
 	)
 
@@ -119,6 +88,7 @@ func (d Driver) Create(req *v.CreateRequest) (err error) {
 	snapshot, _ = req.Options["snapshot"]
 	keyfile, _ = req.Options["keyfile"]
 	volumegroup, _ = req.Options["volumegroup"]
+	fstype, _ = req.Options["fstype"]
 
 	config := &lib.LvCreationConfig{
 		Name:        req.Name,
@@ -127,6 +97,7 @@ func (d Driver) Create(req *v.CreateRequest) (err error) {
 		Snapshot:    snapshot,
 		KeyFile:     keyfile,
 		VolumeGroup: volumegroup,
+		FsType:      fstype,
 	}
 
 	args, err = d.lvm.BuildLogicalVolumeCretionArgs(config)
