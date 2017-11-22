@@ -22,7 +22,8 @@ var (
 	err     error
 	version string = "master-dev"
 	logger         = zerolog.New(os.Stdout).
-		With().Str("from", "main").
+		With().
+		Str("from", "main").
 		Logger()
 )
 
