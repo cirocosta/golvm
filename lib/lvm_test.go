@@ -295,6 +295,66 @@ func TestParseLogicalVolumesOutput(t *testing.T) {
 	}
 }
 
+func TestBuildMountArgs(t *testing.T) {
+	var testCases = []struct {
+		desc        string
+		device      string
+		dest        string
+		expected    []string
+		shouldError bool
+	}{
+		{
+			desc:        "fail with empty destination",
+			device:      "",
+			dest:        "",
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc:        "fail with empty device",
+			dest:        "ahdush",
+			device:      "",
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc:   "works with device and dest set",
+			device: "/dev/device",
+			dest:   "/mnt/test",
+			expected: []string{
+				"/dev/device",
+				"/mnt/test",
+			},
+			shouldError: false,
+		},
+	}
+
+	var (
+		err  error
+		l    Lvm
+		args []string
+	)
+
+	l, err = NewLvm(LvmConfig{})
+	require.NoError(t, err)
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			args, err = l.BuildMountArgs(tc.device, tc.dest)
+			if tc.shouldError {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			require.Equal(t, len(tc.expected), len(args))
+			for ndx, arg := range args {
+				assert.Equal(t, tc.expected[ndx], arg)
+			}
+		})
+	}
+}
+
 func TestBuildMakeFsArgs(t *testing.T) {
 	var testCases = []struct {
 		desc        string

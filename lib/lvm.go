@@ -292,13 +292,18 @@ func DecodeLogicalVolumesResponse(response []byte) (infos []*LogicalVolume, err 
 	return
 }
 
-// BuildVolumeMountArgs builds a list of arguments to
+// BuildMountArgs builds a list of arguments to
 // be used on the 'mount' command to properly mount
 // a given device to a location in the filesystem hierarchy.
-func (l Lvm) BuildVolumeMountArgs(location string) (err error) {
-	if location == "" {
-		err = errors.Errorf("a location must be specified")
+func (l Lvm) BuildMountArgs(device, dest string) (args []string, err error) {
+	if dest == "" || device == "" {
+		err = errors.Errorf("a device and a destination must be specified")
 		return
+	}
+
+	args = []string{
+		device,
+		dest,
 	}
 
 	return
