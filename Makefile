@@ -18,6 +18,7 @@ install:
 
 test:
 	cd ./lib && go test
+	cd ./driver && go test
 
 rootfs-image:
 	docker build -t $(ROOTFS_IMAGE) .

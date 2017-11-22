@@ -11,3 +11,6 @@ import:
   subpackages:
   - volume
 - package: gopkg.in/urfave/cli.v2
+- package: golang.org/x/sys
+  subpackages:
+  - unix
