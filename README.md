@@ -1,6 +1,37 @@
 # golvm
 
-## Usage
+## Plugin usage
+
+1.      (optional) Create a whitelist of volumegroups to be used by the plugin
+
+```sh
+echo "vgs1" >> /mnt/lvmvol/whitelist
+```
+
+2.      Install the plugin
+
+```sh
+docker plugin install \
+        --grant-all-permissions \
+        cirocosta/golvm
+```
+
+3.      Create a volume
+
+```sh
+docker volume create \
+        --driver lvmvol \
+        --opt size=10M \
+        myvol
+```
+
+4.      List the volumes
+
+```sh
+docker volume ls
+``` 
+
+## `lvmctl` Usage
 
 ```
 lvmctl --help
