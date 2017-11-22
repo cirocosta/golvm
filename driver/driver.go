@@ -1,6 +1,7 @@
 package driver
 
 import (
+	"bufio"
 	"os"
 	"sync"
 
@@ -17,8 +18,9 @@ const (
 )
 
 type Driver struct {
-	lvm    *lib.Lvm
-	logger zerolog.Logger
+	lvm         *lib.Lvm
+	logger      zerolog.Logger
+	vgWhiteList []string
 	sync.Mutex
 }
 
@@ -27,6 +29,8 @@ type DriverConfig struct {
 }
 
 func NewDriver(cfg DriverConfig) (d Driver, err error) {
+	var whitelist []string
+
 	if cfg.Lvm == nil {
 		err = errors.Errorf("Lvm must be specified")
 		return
@@ -37,8 +41,52 @@ func NewDriver(cfg DriverConfig) (d Driver, err error) {
 		Str("from", "driver").
 		Logger()
 
+	whitelist, err = ReadVgWhitelist(VolumeGroupsWhiteListFile)
+	if err != nil {
+		err = errors.Wrapf(err, "couldn't read vgs from whitelist file")
+		return
+	}
+
+	for _, vg := range whitelist {
+		d.logger.Info().
+			Str("vg", vg).
+			Msg("vg whitelisted")
+	}
+
 	d.lvm = cfg.Lvm
+	d.vgWhiteList = whitelist
 	d.logger.Info().Msg("driver initialized")
+
+	return
+}
+
+func ReadVgWhitelist(filename string) (vgs []string, err error) {
+	var (
+		file *os.File
+	)
+
+	file, err = os.Open(filename)
+	if err != nil {
+		err = errors.Wrapf(err,
+			"can't open whitelist file %s", filename)
+		return
+	}
+	defer file.Close()
+
+	vgs = make([]string, 0)
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		vgs = append(vgs, scanner.Text())
+	}
+
+	err = scanner.Err()
+	if err != nil {
+		err = errors.Wrapf(err,
+			"failed to read whitelist %s lines",
+			filename)
+		return
+	}
 
 	return
 }

@@ -66,6 +66,7 @@ var (
 		"S": "snapshot",
 		"p": "pvmove",
 		"v": "virtual",
+		"V": "thin volume",
 		"i": "mirror or raid image",
 		"I": "mirror our raid image out-of-sync",
 		"t": "thin pool",

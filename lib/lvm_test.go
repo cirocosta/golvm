@@ -639,6 +639,23 @@ func TestParseLvAttr(t *testing.T) {
 			},
 			shouldError: false,
 		},
+		{
+			desc:  "proper thin parse",
+			input: "Vwi-a-tz--",
+			expected: &LvAttr{
+				VolumeType:                "thin volume",
+				Permissions:               "writeable",
+				AllocationPolicy:          "inherited",
+				FixedMinor:                "-",
+				State:                     "active",
+				DeviceState:               "-",
+				TargetType:                "thin",
+				OverrideNewBlocksWithZero: "overwrite by zero",
+				VolumeHealth:              "-",
+				SkipActivation:            "-",
+			},
+			shouldError: false,
+		},
 	}
 
 	var (
