@@ -14,8 +14,8 @@ import (
 const (
 	socketAddress   = "/run/docker/plugins/golvm.sock"
 	volumeMountRoot = "/mnt"
-	hostMountPoint  = "/mnt/lvmvol"
 	vgWhitelistFile = "/mnt/lvmvol/whitelist"
+	mountsFile      = "/host/proc/mounts"
 )
 
 var (

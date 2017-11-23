@@ -187,6 +187,12 @@ func (l Lvm) Mount(device, location string) (err error) {
 	return
 }
 
+// Unmount runs the 'umount' command with the arguments provided.
+func (l Lvm) Unmount(location string) (err error) {
+	_, err = l.Run("umount", location)
+	return
+}
+
 // CreateLv runs the 'lvremove' command with
 // the arguments provided.
 func (l Lvm) RemoveLv(cfg LvRemovalConfig) (err error) {
@@ -214,6 +220,14 @@ func (l Lvm) CreateLv(cfg LvCreationConfig) (err error) {
 	}
 
 	_, err = l.Run("lvcreate", args...)
+	return
+}
+
+// GetVolumeMountInfo retrieve volume mounting information
+// about a specific volume.
+// If it's not mounted, a nil MountInfo is returned with no
+// errors.
+func (l Lvm) GetVolumeMountInfo(name string) (info *MountInfo, err error) {
 	return
 }
 

@@ -99,3 +99,10 @@ type LvAttr struct {
 	VolumeHealth              string
 	SkipActivation            string
 }
+
+type MountInfo struct {
+	Device   string
+	Location string
+	Format   string
+	Options  string
+}

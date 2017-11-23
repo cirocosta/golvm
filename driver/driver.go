@@ -311,6 +311,9 @@ func (d Driver) Mount(req *v.MountRequest) (resp *v.MountResponse, err error) {
 		return
 	}
 
+	// check if it's the first container
+	//	if so, mount
+
 	mountpoint, found, err = d.dirManager.Get(req.Name)
 	if err != nil {
 		err = errors.Errorf(
@@ -377,6 +380,9 @@ func (d Driver) Unmount(req *v.UnmountRequest) (err error) {
 		Str("name", req.Name).
 		Str("ID", req.ID).
 		Msg("starting unmount")
+
+	// check if it's the first container
+	//	if so, umount
 
 	return
 }

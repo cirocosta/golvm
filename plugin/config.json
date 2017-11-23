@@ -27,6 +27,14 @@
             "Type": "bind"
         },
         {
+            "Destination": "/host/proc/mounts",
+            "Options": [
+                    "bind"
+            ],
+            "Source": "/proc/mounts",
+            "Type": "bind"
+        },
+        {
             "Destination": "/dev",
             "Options": [
                 "rbind",
