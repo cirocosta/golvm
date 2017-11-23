@@ -203,6 +203,11 @@ func (d Driver) Get(req *v.GetRequest) (resp *v.GetResponse, err error) {
 }
 
 func (d Driver) Remove(req *v.RemoveRequest) (err error) {
+	var (
+		vol             *lib.LogicalVolume
+		mountpointFound bool
+	)
+
 	d.logger.Debug().
 		Str("name", req.Name).
 		Msg("starting removal")
@@ -210,7 +215,40 @@ func (d Driver) Remove(req *v.RemoveRequest) (err error) {
 	d.Lock()
 	defer d.Unlock()
 
-	// get the LV from the lvs
+	vol, err = d.lvm.GetLogicalVolume(req.Name)
+	if err != nil {
+		err = errors.Wrapf(err,
+			"errored retrieving logical volume")
+		return
+	}
+
+	if vol == nil {
+		err = errors.Errorf(
+			"logical volume %s not found in LVM",
+			req.Name)
+		return
+	}
+
+	_, mountpointFound, err = d.dirManager.Get(req.Name)
+	if err != nil {
+		err = errors.Wrapf(err,
+			"errored searching for mountpoint of volume %s",
+			req.Name)
+		return
+	}
+
+	if mountpointFound {
+		// unmount
+		// remove
+	}
+
+	args, err := d.lvm.BuildLogicalVolumeRemovalArgs(lib.LvRemovalConfig{
+		LvName: vol.LvName,
+		VgName: vol.VgName,
+	})
+
+	err = d.lvm.RemoveLv(args...)
+
 	// check if there's still a directory
 	//	if true: umount and then delete the directory
 	// remove the volume
