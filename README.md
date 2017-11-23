@@ -4,7 +4,7 @@
 
 ## Plugin
 
-### Plugin activation
+### Activation
 
 Every volume managed by the plugin is mounted under `/mnt/lvmvol/volumes` by default (can be configured). 
 
@@ -89,7 +89,7 @@ ID                  NAME                DESCRIPTION                           EN
 84628b54dea6        lvmvol:latest       Docker plugin to manage LVM volumes   true
 ```
 
-### Plugin usage
+### Usage
 
 Once the plugin has been properly installed we can start using it.
 
