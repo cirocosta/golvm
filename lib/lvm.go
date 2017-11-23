@@ -109,12 +109,16 @@ func (l Lvm) ListVolumeGroups() (vols []*VolumeGroup, err error) {
 //	-	ext4
 //	-	xfs
 func (l Lvm) FormatDevice(device, fsType string) (err error) {
-	args, err := BuildMakeFsArgs(fsType, device)
+	var args []string
+
+	args, err = BuildMakeFsArgs(fsType, device)
 	if err != nil {
+		err = errors.Wrapf(err,
+			"couldn't build args for formatting device")
 		return
 	}
 
-	err = l.MakeFs(args...)
+	_, err = l.Run("mkfs", args...)
 	return
 }
 
@@ -180,12 +184,6 @@ func (l Lvm) ListLogicalVolumes() (vols []*LogicalVolume, err error) {
 // Mount runs the 'mount' command with the arguments provided.
 func (l Lvm) Mount(device, location string) (err error) {
 	_, err = l.Run("mount", device, location)
-	return
-}
-
-// MakeFs runs the 'mkfs' command with the arguments provided.
-func (l Lvm) MakeFs(args ...string) (err error) {
-	_, err = l.Run("mkfs", args...)
 	return
 }
 
