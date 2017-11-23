@@ -1,17 +1,31 @@
-
 # golvm
 
 `golvm` provides both a library for dealing with LVM operations as well as a docker plugin (`lvmvol`).
+
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
 
 - [Plugin](#plugin)
   - [Activation](#activation)
     - [Default configuration](#default-configuration)
     - [Custom configuration](#custom-configuration)
   - [Usage](#usage)
-- [`lvmctl` Usage](#lvmctl-usage)
-- [Examples](#examples)
-- [Docker Plugin](#docker-plugin)
-- [TODO](#todo)
+    - [Create regular volume](#create-regular-volume)
+    - [Create thinly provisioned volume](#create-thinly-provisioned-volume)
+    - [Create snapshot volume](#create-snapshot-volume)
+    - [Create thin snapshot volume](#create-thin-snapshot-volume)
+    - [List volumes](#list-volumes)
+    - [Inspect volume](#inspect-volume)
+- [lvmctl](#lvmctl)
+  - [Create regular volume](#create-regular-volume-1)
+  - [Create thin volume](#create-thin-volume)
+  - [Create snapshot](#create-snapshot)
+  - [Create thin snapshot](#create-thin-snapshot)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 
 ## Plugin
 
@@ -102,23 +116,7 @@ ID                  NAME                DESCRIPTION                           EN
 
 ### Usage
 
-Once the plugin has been properly installed we can start using it.
-
-1. (optional) Create a whitelist of volumegroups to be used by the plugin
-
-```sh
-echo "vgs1" >> /mnt/lvmvol/whitelist
-```
-
-2.      Install the plugin
-
-```sh
-docker plugin install \
-        --grant-all-permissions \
-        cirocosta/golvm
-```
-
-3.      Create a volume
+#### Create regular volume
 
 ```sh
 docker volume create \
@@ -127,13 +125,23 @@ docker volume create \
         myvol
 ```
 
-4.      List the volumes
+#### Create thinly provisioned volume
+
+#### Create snapshot volume
+
+#### Create thin snapshot volume
+
+#### List volumes
 
 ```sh
 docker volume ls
 ``` 
 
-## `lvmctl` Usage
+#### Inspect volume
+
+## lvmctl
+
+`lvmctl` is a side utility that eases the process of managing the LVM volumes. It's only needed for performing actions that can't be covered by Docker's plugin semantics.
 
 ```
 lvmctl --help
@@ -159,9 +167,7 @@ GLOBAL OPTIONS:
    --version, -v  print the version (default: false)
 ``` 
 
-## Examples
-
-1.	Create a volume named `vol` with size `10M`.
+### Create regular volume
 
 ```sh
 lvmctl create \
@@ -169,11 +175,9 @@ lvmctl create \
 	vol
 ```
 
-
-2. 	Create a thinly-provisioned lvm volume named `thin_vol` in `mythinpool`
+### Create thin volume
 
 ```sh
-
 sudo lvcreate \
         --size 20M \
         --thin \
@@ -185,8 +189,8 @@ lvmctl create \
 	thin_vol
 ```
 
+### Create snapshot
 
-3. 	Create a snapshot volume of `foobar` named `foobar_snap`. 
 
 ```sh
 lvmctl create \
@@ -194,6 +198,8 @@ lvmctl create \
 	--snapshot=foobar \
 	foobar_snap
 ```
+
+### Create thin snapshot
 
 
 4.	Create a thin snapshot of `foobar` named `foobar_thin_snap` (same command as the normal snapshot but without `--size` option)
@@ -214,18 +220,4 @@ lvmctl \
 ```
 
 ps.: Snapshots of encrypted volumes use the same key file. The key file must be present when the volume is created, and when it is mounted to a container.
-
-
-## Docker Plugin
-
-1.      Whitelist volume groups to be used
-
-```
-echo "myvg" >> /etc/docker/golvm
-```
-
-
-## TODO
-
-- check if the LV will conflict prior to the creation
 
