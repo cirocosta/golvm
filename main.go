@@ -40,6 +40,7 @@ func main() {
 		Lvm:             &l,
 		DirManager:      &dm,
 		VgWhitelistFile: vgWhitelistFile,
+		MountsFile:      mountsFile,
 	})
 	utils.Abort(err)
 

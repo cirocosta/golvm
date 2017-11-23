@@ -16,6 +16,7 @@ type Driver struct {
 	dirManager  *DirManager
 	logger      zerolog.Logger
 	vgWhiteList []string
+	mountsFile  string
 	sync.Mutex
 }
 
@@ -23,10 +24,16 @@ type DriverConfig struct {
 	Lvm             *lib.Lvm
 	DirManager      *DirManager
 	VgWhitelistFile string
+	MountsFile      string
 }
 
 func NewDriver(cfg DriverConfig) (d Driver, err error) {
 	var whitelist []string
+
+	if cfg.MountsFile == "" {
+		err = errors.Errorf("MountsFile must be specified")
+		return
+	}
 
 	if cfg.Lvm == nil {
 		err = errors.Errorf("Lvm must be specified")
@@ -65,6 +72,7 @@ func NewDriver(cfg DriverConfig) (d Driver, err error) {
 	d.lvm = cfg.Lvm
 	d.dirManager = cfg.DirManager
 	d.vgWhiteList = whitelist
+	d.mountsFile = cfg.MountsFile
 	d.logger.Info().Msg("driver initialized")
 
 	return
@@ -287,12 +295,34 @@ func (d Driver) Path(req *v.PathRequest) (resp *v.PathResponse, err error) {
 	return
 }
 
+func (d Driver) IsLocationMounted(location string) (isMounted bool, err error) {
+	var infos []*lib.MountInfo
+
+	infos, err = lib.ParseMountsFile(d.mountsFile)
+	if err != nil {
+		err = errors.Wrapf(err,
+			"failed to parse mounts from file %s",
+			d.mountsFile)
+		return
+	}
+
+	for _, info := range infos {
+		if info.Location == location {
+			isMounted = true
+			return
+		}
+	}
+
+	return
+}
+
 func (d Driver) Mount(req *v.MountRequest) (resp *v.MountResponse, err error) {
 	var (
 		vol         *lib.LogicalVolume
 		mountpoint  string
 		found       bool
 		isFormatted bool
+		isMounted   bool
 	)
 
 	d.logger.Debug().
@@ -311,9 +341,6 @@ func (d Driver) Mount(req *v.MountRequest) (resp *v.MountResponse, err error) {
 		return
 	}
 
-	// check if it's the first container
-	//	if so, mount
-
 	mountpoint, found, err = d.dirManager.Get(req.Name)
 	if err != nil {
 		err = errors.Errorf(
@@ -328,6 +355,19 @@ func (d Driver) Mount(req *v.MountRequest) (resp *v.MountResponse, err error) {
 			err = errors.Wrapf(err,
 				"couldn't create mountpoint for volume %s",
 				req.Name)
+			return
+		}
+	} else {
+		isMounted, err = d.IsLocationMounted(mountpoint)
+		if err != nil {
+			err = errors.Wrapf(err, "failed retrieving mount info list")
+			return
+		}
+
+		if isMounted {
+			resp = &v.MountResponse{
+				Mountpoint: mountpoint,
+			}
 			return
 		}
 	}
@@ -373,16 +413,38 @@ func (d Driver) Mount(req *v.MountRequest) (resp *v.MountResponse, err error) {
 }
 
 func (d Driver) Unmount(req *v.UnmountRequest) (err error) {
-	d.Lock()
-	defer d.Unlock()
+	var (
+		mountpoint string
+		found      bool
+	)
 
 	d.logger.Debug().
 		Str("name", req.Name).
 		Str("ID", req.ID).
 		Msg("starting unmount")
 
-	// check if it's the first container
-	//	if so, umount
+	d.Lock()
+	defer d.Unlock()
+
+	mountpoint, found, err = d.dirManager.Get(req.Name)
+	if err != nil {
+		err = errors.Errorf(
+			"errored looking for mountpoint of volume %s",
+			req.Name)
+		return
+	}
+
+	if !found {
+		return
+	}
+
+	err = d.lvm.Unmount(mountpoint)
+	if err != nil {
+		err = errors.Wrapf(err,
+			"failed to unmount volume %s from %s",
+			req.Name, mountpoint)
+		return
+	}
 
 	return
 }
