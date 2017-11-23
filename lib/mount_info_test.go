@@ -1,6 +1,8 @@
 package lib
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -94,4 +96,30 @@ func TestParseMountInfoLine(t *testing.T) {
 			assert.Equal(t, tc.expected.Options, actual.Options)
 		})
 	}
+}
+
+func TestParseMountsFile(t *testing.T) {
+	var fileContent = []byte(`
+proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
+udev /dev devtmpfs rw,nosuid,relatime,size=4014860k,nr_inodes=1003715,mode=755 0 0
+tmpfs /sys/fs/cgroup tmpfs ro,nosuid,nodev,noexec,mode=755 0 0
+cgroup /sys/fs/cgroup/systemd cgroup rw,nosuid,nodev,noexec,relatime,xattr,release_agent=/lib/systemd/systemd-cgroups-agent,name=systemd 0 0
+pstore /sys/fs/pstore pstore rw,nosuid,nodev,noexec,relatime 0 0
+efivarfs /sys/firmware/efi/efivars efivarfs rw,nosuid,nodev,noexec,relatime 0 0
+`)
+	file, err := ioutil.TempFile("", "")
+	assert.NoError(t, err)
+	filename := file.Name()
+
+	defer os.Remove(filename)
+
+	_, err = file.Write(fileContent)
+	assert.NoError(t, err)
+	file.Close()
+
+	infos, err := ParseMountsFile(filename)
+	assert.NoError(t, err)
+	assert.Equal(t, 6, len(infos))
+	assert.Equal(t, "proc", infos[0].Device)
+	assert.Equal(t, "efivarfs", infos[5].Device)
 }
