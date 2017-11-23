@@ -6,7 +6,9 @@
 
 ### Plugin activation
 
-Every volume managed by the plugin is mounted under `/mnt/lvmvol/volumes` by default (can be configured). Using the default configuration means that it's required that the directory `/mnt` exists before the plugin is enabled.
+Every volume managed by the plugin is mounted under `/mnt/lvmvol/volumes` by default (can be configured). 
+
+Using the default configuration means that it's required that the directory `/mnt` exists before the plugin is enabled.
 
 
 #### Default configuration
