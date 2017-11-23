@@ -130,6 +130,9 @@ func (d Driver) Create(req *v.CreateRequest) (err error) {
 func (d Driver) List() (resp *v.ListResponse, err error) {
 	var vols []*lib.LogicalVolume
 
+	d.logger.Debug().
+		Msg("starting list")
+
 	d.Lock()
 	defer d.Unlock()
 
@@ -160,6 +163,10 @@ func (d Driver) Get(req *v.GetRequest) (resp *v.GetResponse, err error) {
 		mountpoint string
 		vol        *lib.LogicalVolume
 	)
+
+	d.logger.Debug().
+		Str("name", req.Name).
+		Msg("starting get")
 
 	d.Lock()
 	defer d.Unlock()
@@ -193,6 +200,10 @@ func (d Driver) Get(req *v.GetRequest) (resp *v.GetResponse, err error) {
 }
 
 func (d Driver) Remove(req *v.RemoveRequest) (err error) {
+	d.logger.Debug().
+		Str("name", req.Name).
+		Msg("starting removal")
+
 	d.Lock()
 	defer d.Unlock()
 
@@ -207,10 +218,27 @@ func (d Driver) Remove(req *v.RemoveRequest) (err error) {
 func (d Driver) Path(req *v.PathRequest) (resp *v.PathResponse, err error) {
 	var (
 		mountpoint string
+		vol *lib.LogicalVolume
 	)
+
+	d.logger.Debug().
+		Str("name", req.Name).
+		Msg("starting path")
 
 	d.Lock()
 	defer d.Unlock()
+
+	vol, err = d.lvm.GetLogicalVolume(req.Name)
+	if err != nil {
+		err = errors.Wrapf(err,
+			"errored searching for volume named %s",
+			req.Name)
+		return
+	}
+
+	if vol == nil {
+		return
+	}
 
 	mountpoint, _, err = d.dirManager.Get(req.Name)
 	if err != nil {
@@ -233,6 +261,11 @@ func (d Driver) Mount(req *v.MountRequest) (resp *v.MountResponse, err error) {
 		found       bool
 		isFormatted bool
 	)
+
+	d.logger.Debug().
+		Str("name", req.Name).
+		Str("ID", req.ID).
+		Msg("starting mount")
 
 	d.Lock()
 	defer d.Unlock()
@@ -308,10 +341,18 @@ func (d Driver) Unmount(req *v.UnmountRequest) (err error) {
 	d.Lock()
 	defer d.Unlock()
 
+	d.logger.Debug().
+		Str("name", req.Name).
+		Str("ID", req.ID).
+		Msg("starting unmount")
+
 	return
 }
 
 func (d Driver) Capabilities() (resp *v.CapabilitiesResponse) {
+	d.logger.Debug().
+		Msg("starting capabilities")
+
 	resp = &v.CapabilitiesResponse{
 		Capabilities: v.Capability{
 			Scope: "global",

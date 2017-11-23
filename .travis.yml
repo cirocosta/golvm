@@ -12,7 +12,7 @@ before_install:
   - './.travis/main.sh'
 
 install:
-  - 'sudo bash ./utils/main.sh'
+  - 'sudo bash ./utils/create.sh'
   - 'make plugin'
 
 script:
