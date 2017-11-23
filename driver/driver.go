@@ -80,7 +80,6 @@ func (d Driver) Create(req *v.CreateRequest) (err error) {
 		keyfile     string
 		volumegroup string
 		fstype      string
-		args        []string
 	)
 
 	d.logger.Debug().
@@ -98,7 +97,7 @@ func (d Driver) Create(req *v.CreateRequest) (err error) {
 	volumegroup, _ = req.Options["volumegroup"]
 	fstype, _ = req.Options["fstype"]
 
-	config := &lib.LvCreationConfig{
+	err = d.lvm.CreateLv(lib.LvCreationConfig{
 		Name:        req.Name,
 		Size:        size,
 		ThinPool:    thinpool,
@@ -106,15 +105,7 @@ func (d Driver) Create(req *v.CreateRequest) (err error) {
 		KeyFile:     keyfile,
 		VolumeGroup: volumegroup,
 		FsType:      fstype,
-	}
-
-	args, err = lib.BuildLogicalVolumeCretionArgs(config)
-	if err != nil {
-		err = errors.Wrapf(err, "couldn't build volume creation args")
-		return
-	}
-
-	err = d.lvm.CreateLv(args...)
+	})
 	if err != nil {
 		err = errors.Wrapf(err, "failed to create logical volume")
 		return
@@ -242,12 +233,10 @@ func (d Driver) Remove(req *v.RemoveRequest) (err error) {
 		// remove
 	}
 
-	args, err := lib.BuildLogicalVolumeRemovalArgs(lib.LvRemovalConfig{
+	err = d.lvm.RemoveLv(lib.LvRemovalConfig{
 		LvName: vol.LvName,
 		VgName: vol.VgName,
 	})
-
-	err = d.lvm.RemoveLv(args...)
 
 	// check if there's still a directory
 	//	if true: umount and then delete the directory

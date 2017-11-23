@@ -277,7 +277,7 @@ func TestBuildLogicalVolumeCreationArgs(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			args, err = BuildLogicalVolumeCretionArgs(tc.cfg)
+			args, err = BuildLogicalVolumeCretionArgs(*tc.cfg)
 			if tc.shouldError {
 				require.Error(t, err)
 				return

@@ -54,7 +54,7 @@ func BuildMakeFsArgs(fsType, device string) (args []string, err error) {
 // notes.:
 //	-	a snapshot is a volume that is created from
 //		another volume that must already exist.
-func BuildLogicalVolumeCretionArgs(cfg *LvCreationConfig) (args []string, err error) {
+func BuildLogicalVolumeCretionArgs(cfg LvCreationConfig) (args []string, err error) {
 	var (
 		isThinSnapshot = false // TODO detect this
 		isSnapshot     = cfg.Snapshot != ""

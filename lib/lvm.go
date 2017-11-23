@@ -121,12 +121,14 @@ func (l Lvm) FormatDevice(device, fsType string) (err error) {
 // IsDeviceFormatted checks whether a given `device`
 // is already formatted with a filesystem.
 func (l Lvm) IsDeviceFormatted(device string) (isFormatted bool, err error) {
+	var response []byte
+
 	args, err := BuildGetDeviceFormatArgs(device)
 	if err != nil {
 		return
 	}
 
-	response, err := l.Lsblk(args...)
+	response, err = l.Run("lsblk", args...)
 	if err != nil {
 		return
 	}
@@ -175,12 +177,6 @@ func (l Lvm) ListLogicalVolumes() (vols []*LogicalVolume, err error) {
 	return
 }
 
-// Lsblk runs the 'lblk' command with the arguments provided.
-func (l Lvm) Lsblk(args ...string) (response []byte, err error) {
-	response, err = l.Run("lsblk", args...)
-	return
-}
-
 // Mount runs the 'mount' command with the arguments provided.
 func (l Lvm) Mount(device, location string) (err error) {
 	_, err = l.Run("mount", device, location)
@@ -195,14 +191,30 @@ func (l Lvm) MakeFs(args ...string) (err error) {
 
 // CreateLv runs the 'lvremove' command with
 // the arguments provided.
-func (l Lvm) RemoveLv(args ...string) (err error) {
+func (l Lvm) RemoveLv(cfg LvRemovalConfig) (err error) {
+	var args []string
+
+	args, err = BuildLogicalVolumeRemovalArgs(cfg)
+	if err != nil {
+		err = errors.Wrapf(err, "failed to create lv removal args")
+		return
+	}
+
 	_, err = l.Run("lvremove", args...)
 	return
 }
 
 // CreateLv runs the 'lvcreate' command with
 // the arguments provided.
-func (l Lvm) CreateLv(args ...string) (err error) {
+func (l Lvm) CreateLv(cfg LvCreationConfig) (err error) {
+	var args []string
+
+	args, err = BuildLogicalVolumeCretionArgs(cfg)
+	if err != nil {
+		err = errors.Wrapf(err, "failed to create lv cretion args")
+		return
+	}
+
 	_, err = l.Run("lvcreate", args...)
 	return
 }

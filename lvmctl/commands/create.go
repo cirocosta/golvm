@@ -48,7 +48,6 @@ var Create = cli.Command{
 			thinpool    = c.String("thinpool")
 			snapshot    = c.String("snapshot")
 			keyfile     = c.String("keyfile")
-			args        []string
 		)
 
 		lvm, err := lib.NewLvm(lib.LvmConfig{})
@@ -74,7 +73,7 @@ var Create = cli.Command{
 			volumegroup = vg.Name
 		}
 
-		args, err = lib.BuildLogicalVolumeCretionArgs(&lib.LvCreationConfig{
+		err = lvm.CreateLv(lib.LvCreationConfig{
 			Name:        name,
 			Size:        size,
 			VolumeGroup: volumegroup,
@@ -82,9 +81,6 @@ var Create = cli.Command{
 			ThinPool:    thinpool,
 			KeyFile:     keyfile,
 		})
-		utils.Abort(err)
-
-		err = lvm.CreateLv(args...)
 		utils.Abort(err)
 
 		return
