@@ -351,7 +351,6 @@ func (d Driver) Mount(req *v.MountRequest) (resp *v.MountResponse, err error) {
 				"couldn't format device %s as %s",
 				vol.LvDmPath, "ext4")
 		}
-		return
 	}
 
 	err = d.lvm.Mount(vol.LvDmPath, mountpoint)
