@@ -15,8 +15,9 @@ type Driver struct {
 	lvm         *lib.Lvm
 	dirManager  *DirManager
 	logger      zerolog.Logger
-	vgWhiteList []string
+	vgWhiteList map[string]bool
 	mountsFile  string
+
 	sync.Mutex
 }
 
@@ -28,7 +29,7 @@ type DriverConfig struct {
 }
 
 func NewDriver(cfg DriverConfig) (d Driver, err error) {
-	var whitelist []string
+	var whitelist map[string]bool
 
 	if cfg.MountsFile == "" {
 		err = errors.Errorf("MountsFile must be specified")
@@ -63,7 +64,7 @@ func NewDriver(cfg DriverConfig) (d Driver, err error) {
 			Msg("couldn't read vgs from whitelist file")
 	}
 
-	for _, vg := range whitelist {
+	for vg, _ := range whitelist {
 		d.logger.Info().
 			Str("vg", vg).
 			Msg("vg whitelisted")
@@ -80,6 +81,19 @@ func NewDriver(cfg DriverConfig) (d Driver, err error) {
 
 // Create creates a new logical volume if it doesn't
 // exist yet.
+// It takes few possible options:
+//	-	size:		size (or virtualsize) to allocate for
+//				the volume
+//	-	thinpool:	creates a thinly-provisioned volume
+//				from the thinpool specified
+//	-	snapshot:	creates a snapshot volume out of the
+//				specified volume
+//	-	keyfile:	file to use on luks encryption
+//	-	volumegroup:	volume group to use or pick the
+//				best one from the pool of whitelisted
+//				volumegroups.
+//	-	fstype:		type of filesystem to use in
+//				the volume (ext4 or xfs)
 func (d Driver) Create(req *v.CreateRequest) (err error) {
 	var (
 		size        string
@@ -104,6 +118,31 @@ func (d Driver) Create(req *v.CreateRequest) (err error) {
 	keyfile, _ = req.Options["keyfile"]
 	volumegroup, _ = req.Options["volumegroup"]
 	fstype, _ = req.Options["fstype"]
+
+	if volumegroup == "" {
+		vgs, err := d.lvm.ListVolumeGroups()
+		err = errors.Wrapf(err,
+			"failed to list volume groups")
+
+		var validVgs = make([]*lib.VolumeGroup, 0)
+		for _, potentialVg := range vgs {
+			_, present := d.vgWhiteList[potentialVg.Name]
+			if present {
+				validVgs = append(validVgs, potentialVg)
+			}
+		}
+
+		vg, err := lib.PickBestVolumeGroup(0, validVgs)
+		err = errors.Wrapf(err,
+			"failed to pick the best volume group")
+
+		if vg == nil {
+			err = errors.Errorf(
+				"didn't find suitable vg for specified size")
+		}
+
+		volumegroup = vg.Name
+	}
 
 	err = d.lvm.CreateLv(lib.LvCreationConfig{
 		Name:        req.Name,

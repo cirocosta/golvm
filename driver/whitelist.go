@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func ReadVgWhitelist(filename string) (vgs []string, err error) {
+func ReadVgWhitelist(filename string) (vgs map[string]bool, err error) {
 	var (
 		file *os.File
 	)
@@ -20,11 +20,11 @@ func ReadVgWhitelist(filename string) (vgs []string, err error) {
 	}
 	defer file.Close()
 
-	vgs = make([]string, 0)
+	vgs = make(map[string]bool)
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
-		vgs = append(vgs, scanner.Text())
+		vgs[scanner.Text()] = true
 	}
 
 	err = scanner.Err()

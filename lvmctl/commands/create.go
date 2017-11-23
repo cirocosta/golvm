@@ -67,7 +67,7 @@ var Create = cli.Command{
 
 			if vg == nil {
 				utils.Abort(errors.Errorf(
-					"didn't find suitable volume group for specified size"))
+					"didn't find suitable vg for specified size"))
 			}
 
 			volumegroup = vg.Name
