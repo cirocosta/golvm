@@ -103,6 +103,9 @@ func (d Driver) Create(req *v.CreateRequest) (err error) {
 		keyfile     string
 		volumegroup string
 		fstype      string
+		validVgs    []*lib.VolumeGroup
+		vgs         []*lib.VolumeGroup
+		vg          *lib.VolumeGroup
 	)
 
 	d.logger.Debug().
@@ -121,28 +124,39 @@ func (d Driver) Create(req *v.CreateRequest) (err error) {
 	fstype, _ = req.Options["fstype"]
 
 	if volumegroup == "" {
-		vgs, err := d.lvm.ListVolumeGroups()
-		err = errors.Wrapf(err,
-			"failed to list volume groups")
-
-		var validVgs = make([]*lib.VolumeGroup, 0)
-		for _, potentialVg := range vgs {
-			_, present := d.vgWhiteList[potentialVg.Name]
-			if present {
-				validVgs = append(validVgs, potentialVg)
-			}
+		vgs, err = d.lvm.ListVolumeGroups()
+		if err != nil {
+			err = errors.Wrapf(err,
+				"failed to list volume groups")
+			return
 		}
 
-		vg, err := lib.PickBestVolumeGroup(0, validVgs)
-		err = errors.Wrapf(err,
-			"failed to pick the best volume group")
+		if len(d.vgWhiteList) > 0 {
+			validVgs = make([]*lib.VolumeGroup, 0)
+			for _, potentialVg := range vgs {
+				_, present := d.vgWhiteList[potentialVg.Name]
+				if present {
+					validVgs = append(validVgs, potentialVg)
+				}
+			}
+		} else {
+			validVgs = vgs
+		}
+
+		vg, err = lib.PickBestVolumeGroup(0, validVgs)
+		if err != nil {
+			err = errors.Wrapf(err,
+				"failed to pick the best volume group")
+			return
+		}
 
 		if vg == nil {
 			err = errors.Errorf(
 				"didn't find suitable vg for specified size")
+			return
+		} else {
+			volumegroup = vg.Name
 		}
-
-		volumegroup = vg.Name
 	}
 
 	err = d.lvm.CreateLv(lib.LvCreationConfig{
