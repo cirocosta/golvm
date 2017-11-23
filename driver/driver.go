@@ -218,7 +218,7 @@ func (d Driver) Remove(req *v.RemoveRequest) (err error) {
 func (d Driver) Path(req *v.PathRequest) (resp *v.PathResponse, err error) {
 	var (
 		mountpoint string
-		vol *lib.LogicalVolume
+		vol        *lib.LogicalVolume
 	)
 
 	d.logger.Debug().
