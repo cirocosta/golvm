@@ -158,10 +158,6 @@ func (d Driver) Create(req *v.CreateRequest) (err error) {
 		return
 	}
 
-	d.logger.Debug().
-		Str("name", req.Name).
-		Msg("finished creation")
-
 	return
 }
 
