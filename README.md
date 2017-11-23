@@ -1,8 +1,42 @@
 # golvm
 
-## Plugin usage
+`golvm` provides both a library for dealing with LVM operations as well as a docker plugin (`lvmvol`).
 
-1.      (optional) Create a whitelist of volumegroups to be used by the plugin
+## Plugin
+
+### Plugin activation
+
+Every volume managed by the plugin is mounted under `/mnt/lvmvol/volumes` by default (can be configured). Using the default configuration means that it's required that the directory `/mnt` exists before the plugin is enabled.
+
+For example:
+
+```sh
+# Install the plugin but don't enable it
+docker plugin install \
+        --disable \
+        --grant-all-permissions \
+        cirocosta/golvm
+
+# Enable 'debug' log level
+docker plugin set \
+        cirocosta/golvm \
+        DEBUG=1
+
+# Set the root of the volume mounts to be '/somewhere'
+# instead of /mnt/lvmvol/volumes
+docker plugin set \
+        cirocosta/golvm \
+        VOLUME_MOUNT_ROOT=/somewhere
+
+# Enable the plugin
+docker plugin enable \
+        cirocosta/golvm
+```
+
+### Plugin usage
+
+
+1. (optional) Create a whitelist of volumegroups to be used by the plugin
 
 ```sh
 echo "vgs1" >> /mnt/lvmvol/whitelist
