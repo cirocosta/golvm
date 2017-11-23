@@ -20,9 +20,12 @@
     - [Inspect volume](#inspect-volume)
 - [lvmctl](#lvmctl)
   - [Create regular volume](#create-regular-volume-1)
-  - [Create thin volume](#create-thin-volume)
-  - [Create snapshot](#create-snapshot)
-  - [Create thin snapshot](#create-thin-snapshot)
+  - [Dependencies](#dependencies)
+  - [Usage](#usage-1)
+    - [Create thin volume](#create-thin-volume)
+    - [Create snapshot](#create-snapshot)
+    - [Create thin snapshot](#create-thin-snapshot)
+    - [Encrypted volume](#encrypted-volume)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -175,10 +178,27 @@ lvmctl create \
 	vol
 ```
 
-### Create thin volume
+### Dependencies
+
+Differently from the Docker plugin, `lvmctl` requires some dependencies. These are:
+
+- lvm2 (for commands like `pvs`, `lvs`,`vgs`, `lvcreate`... )
+- cryptsetup (for `luks` encryption)
+- util-linux  (for `lsblk`)
+- e2fsprogs  (for `mkfs.ext4`)
+- xfsprogs (for `mkfs.xfs`)
+
+
+### Usage
+
+To make use of `lvmctl` make sure you have the right privileges. The same privileges needed for `pvs` are applicable for `lvmctl`. 
+
+The following examples are all ran from a privileged user.
+
+#### Create thin volume
 
 ```sh
-sudo lvcreate \
+lvcreate \
         --size 20M \
         --thin \
         volgroup0/thinpool0
@@ -189,7 +209,7 @@ lvmctl create \
 	thin_vol
 ```
 
-### Create snapshot
+#### Create snapshot
 
 
 ```sh
@@ -199,10 +219,7 @@ lvmctl create \
 	foobar_snap
 ```
 
-### Create thin snapshot
-
-
-4.	Create a thin snapshot of `foobar` named `foobar_thin_snap` (same command as the normal snapshot but without `--size` option)
+#### Create thin snapshot
 
 ```sh
 lvmctl create \
@@ -210,7 +227,7 @@ lvmctl create \
 	foobar_snap
 ```
 
-5.	Create a `LUKS` encrypted volume named `crypt_vol` with the contents of `/root/key.bin` as a binary passphrase. 
+#### Encrypted volume
 
 ```sh
 lvmctl \
