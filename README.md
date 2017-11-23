@@ -19,9 +19,9 @@
     - [List volumes](#list-volumes)
     - [Inspect volume](#inspect-volume)
 - [lvmctl](#lvmctl)
-  - [Create regular volume](#create-regular-volume-1)
   - [Dependencies](#dependencies)
   - [Usage](#usage-1)
+    - [Create regular volume](#create-regular-volume-1)
     - [Create thin volume](#create-thin-volume)
     - [Create snapshot](#create-snapshot)
     - [Create thin snapshot](#create-thin-snapshot)
@@ -170,14 +170,6 @@ GLOBAL OPTIONS:
    --version, -v  print the version (default: false)
 ``` 
 
-### Create regular volume
-
-```sh
-lvmctl create \
-	--size=10M \
-	vol
-```
-
 ### Dependencies
 
 Differently from the Docker plugin, `lvmctl` requires some dependencies. These are:
@@ -194,6 +186,15 @@ Differently from the Docker plugin, `lvmctl` requires some dependencies. These a
 To make use of `lvmctl` make sure you have the right privileges. The same privileges needed for `pvs` are applicable for `lvmctl`. 
 
 The following examples are all ran from a privileged user.
+
+
+#### Create regular volume
+
+```sh
+lvmctl create \
+	--size=10M \
+	vol
+```
 
 #### Create thin volume
 
