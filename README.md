@@ -8,9 +8,53 @@
 
 Every volume managed by the plugin is mounted under `/mnt/lvmvol/volumes` by default (can be configured). Using the default configuration means that it's required that the directory `/mnt` exists before the plugin is enabled.
 
-For example:
+
+#### Default configuration
+
+Using the default configuration is the simples way to go:
+
+0. Optionally create a whitelist of volumegroups
+1. Install the plugin
+2. Start using it
+
 
 ```sh
+# Whitelist some volume groups that we want to make use of
+echo "volumegroup0" | sudo tee "/mnt/lvmvol/whitelist.txt"
+
+# Install the plugin but don't enable it
+docker plugin install \
+        --grant-all-permissions \
+        cirocosta/golvm
+
+# Create a volume
+docker volume create \
+        --driver lvmvol \
+        --size 10M \
+        myvol
+```
+
+By default the following parameters are used:
+
+```
+VOLUME_MOUNT_ROOT:      /mnt/lvmvol/volumes
+WHITELIST_FILE:         /mnt/lvmvol/whitelist.txt
+DEBUG:                  0
+```
+
+
+#### Custom configuration
+
+If the default values are not feasible for your configuration it's possible to configure each of them. 
+
+To do so, install the plugin but don't enable it (append a `--disable` to the install command), then set the variables and then finally enable it.
+
+
+```sh
+# Write some whitelisted volumegroups to a file
+# in a custom location
+echo "volumegroup0" | sudo tee "/mnt/somewhere/blabla.txt"
+
 # Install the plugin but don't enable it
 docker plugin install \
         --disable \
@@ -28,13 +72,24 @@ docker plugin set \
         cirocosta/golvm \
         VOLUME_MOUNT_ROOT=/somewhere
 
+# Set the path of the whitelist file
+docker plugin set \
+        cirocosta/golvm \
+        WHITELIST_FILE=/mnt/somewhere/blabla.txt
+
 # Enable the plugin
 docker plugin enable \
         cirocosta/golvm
+
+# Check whether everything went fine
+docker plugin ls
+ID                  NAME                DESCRIPTION                           ENABLED
+84628b54dea6        lvmvol:latest       Docker plugin to manage LVM volumes   true
 ```
 
 ### Plugin usage
 
+Once the plugin has been properly installed we can start using it.
 
 1. (optional) Create a whitelist of volumegroups to be used by the plugin
 
