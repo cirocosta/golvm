@@ -33,7 +33,7 @@ func NewDirManager(cfg DirManagerConfig) (manager DirManager, err error) {
 
 	if !filepath.IsAbs(cfg.Root) {
 		err = errors.Errorf(
-			"Root (%s) must be an absolute path",
+			"Root %s must be an absolute path",
 			cfg.Root)
 		return
 	}
@@ -50,7 +50,7 @@ func NewDirManager(cfg DirManagerConfig) (manager DirManager, err error) {
 			}
 		} else {
 			err = errors.Wrapf(err,
-				"errored inspecting directory %s",
+				"Errored inspecting directory %s",
 				cfg.Root)
 			return
 		}
@@ -59,7 +59,7 @@ func NewDirManager(cfg DirManagerConfig) (manager DirManager, err error) {
 	err = unix.Access(cfg.Root, unix.W_OK)
 	if err != nil {
 		err = errors.Wrapf(err,
-			"Root (%s) must be writable.",
+			"Root %s must be writable.",
 			cfg.Root)
 		return
 	}
