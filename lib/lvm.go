@@ -80,6 +80,26 @@ func ParseLvAttr(attr string) (parsedAttr *LvAttr, err error) {
 	return
 }
 
+func (l Lvm) GetLogicalVolume(name string) (vol *LogicalVolume, err error) {
+	vols, err := l.ListLogicalVolumes()
+	if err != nil {
+		err = errors.Wrapf(err,
+			"couldn't list logical volumes")
+		return
+	}
+
+	for _, vol = range vols {
+		if vol.LvName != name {
+			continue
+		}
+
+		return
+	}
+
+	vol = nil
+	return
+}
+
 // PickBestVolumeGroup picks the volume group that best
 // accomodates a given size.
 // 'size' specifies the size to be accomodated - if 0, any
@@ -200,6 +220,16 @@ func (l Lvm) ListVolumeGroups() (vols []*VolumeGroup, err error) {
 	return
 }
 
+func (l Lvm) FormatDevice(device, fsType string) (err error) {
+	args, err := l.BuildMakeFsArgs(fsType, device)
+	if err != nil {
+		return
+	}
+
+	err = l.MakeFs(args...)
+	return
+}
+
 // DecodeVolumeGroupsRepsponse takes a JSON response from
 // the execition of the 'vgs' command and returns a slice of
 // VolumeGroup structs.
@@ -232,6 +262,21 @@ func DecodeVolumeGroupsResponse(response []byte) (infos []*VolumeGroup, err erro
 	return
 }
 
+func (l Lvm) IsDeviceFormatted(device string) (isFormatted bool, err error) {
+	args, err := l.BuildGetDeviceFormatArgs(device)
+	if err != nil {
+		return
+	}
+
+	response, err := l.Lsblk(args...)
+	if err != nil {
+		return
+	}
+
+	isFormatted = string(response) == ""
+	return
+}
+
 // ListLogicalVolumes retrieves a list of LogicalVolume structs
 // from the result of parsing the response of the 'lvs' command.
 func (l Lvm) ListLogicalVolumes() (vols []*LogicalVolume, err error) {
@@ -243,6 +288,7 @@ func (l Lvm) ListLogicalVolumes() (vols []*LogicalVolume, err error) {
 		"--units=m",
 		"--nosuffix",
 		"--noheadings",
+		"--options=lv_all",
 		"--report-format=json")
 	if err != nil {
 		err = errors.Wrapf(err,
@@ -255,6 +301,16 @@ func (l Lvm) ListLogicalVolumes() (vols []*LogicalVolume, err error) {
 		err = errors.Wrapf(err,
 			"failed to devoce logical volumes response")
 		return
+	}
+
+	for _, vol := range vols {
+		if vol.VgName == "" && vol.LvFullName != "" {
+			parts := strings.SplitN(vol.LvFullName, "/", 2)
+			if len(parts) != 2 {
+				continue
+			}
+			vol.VgName = parts[0]
+		}
 	}
 
 	return
@@ -292,20 +348,31 @@ func DecodeLogicalVolumesResponse(response []byte) (infos []*LogicalVolume, err 
 	return
 }
 
-// BuildMountArgs builds a list of arguments to
-// be used on the 'mount' command to properly mount
-// a given device to a location in the filesystem hierarchy.
-func (l Lvm) BuildMountArgs(device, dest string) (args []string, err error) {
-	if dest == "" || device == "" {
-		err = errors.Errorf("a device and a destination must be specified")
+func (l Lvm) BuildGetDeviceFormatArgs(device string) (args []string, err error) {
+	if device == "" {
+		err = errors.Errorf("a device must be specified")
 		return
 	}
 
 	args = []string{
+		"--noheadings",
+		"--discard",
+		"--output=FSTYPE",
 		device,
-		dest,
 	}
 
+	return
+}
+
+// Lsblk runs the 'lblk' command with the arguments provided.
+func (l Lvm) Lsblk(args ...string) (response []byte, err error) {
+	response, err = l.Run("lsblk", args...)
+	return
+}
+
+// Mount runs the 'mount' command with the arguments provided.
+func (l Lvm) Mount(device, location string) (err error) {
+	_, err = l.Run("mount", device, location)
 	return
 }
 

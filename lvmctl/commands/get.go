@@ -51,8 +51,7 @@ var Get = cli.Command{
 				"volume named %s not found", name))
 		}
 
-		fmt.Printf("NAME\t\t%s\n", desiredVolume.LvName)
-		fmt.Printf("VG\t\t%s\n", desiredVolume.VgName)
+		fmt.Printf("NAME\t\t%s\n", desiredVolume.LvFullName)
 		fmt.Printf("POOL\t\t%s\n", desiredVolume.PoolLv)
 		fmt.Printf("SIZE\t\t%f\n", desiredVolume.LvSize)
 		fmt.Printf("ATTR\t\t%s\n", desiredVolume.LvAttr)

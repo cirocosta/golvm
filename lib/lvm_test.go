@@ -61,7 +61,8 @@ const (
                     "move_pv": "",
                     "origin": "",
                     "pool_lv": "",
-                    "vg_name": "myvg"
+                    "vg_name": "myvg",
+		    "lv_dm_path": "/dev/mapper/volgroup0-tvol2"
                 }
             ]
         }
@@ -251,9 +252,10 @@ func TestParseLogicalVolumesOutput(t *testing.T) {
 			input: []byte(respLvs1),
 			expected: []*LogicalVolume{
 				&LogicalVolume{
-					LvName: "lv1",
-					LvSize: 12.0,
-					LvAttr: "-wi-a-----",
+					LvName:   "lv1",
+					LvSize:   12.0,
+					LvAttr:   "-wi-a-----",
+					LvDmPath: "/dev/mapper/volgroup0-tvol2",
 				},
 			},
 			shouldError: false,
@@ -295,35 +297,27 @@ func TestParseLogicalVolumesOutput(t *testing.T) {
 	}
 }
 
-func TestBuildMountArgs(t *testing.T) {
+func TestBuildGetDeviceFormatArgs(t *testing.T) {
 	var testCases = []struct {
 		desc        string
 		device      string
-		dest        string
 		expected    []string
 		shouldError bool
 	}{
 		{
-			desc:        "fail with empty destination",
-			device:      "",
-			dest:        "",
-			expected:    []string{},
-			shouldError: true,
-		},
-		{
 			desc:        "fail with empty device",
-			dest:        "ahdush",
 			device:      "",
 			expected:    []string{},
 			shouldError: true,
 		},
 		{
-			desc:   "works with device and dest set",
+			desc:   "works with device",
 			device: "/dev/device",
-			dest:   "/mnt/test",
 			expected: []string{
+				"--noheadings",
+				"--discard",
+				"--output=FSTYPE",
 				"/dev/device",
-				"/mnt/test",
 			},
 			shouldError: false,
 		},
@@ -340,7 +334,7 @@ func TestBuildMountArgs(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			args, err = l.BuildMountArgs(tc.device, tc.dest)
+			args, err = l.BuildGetDeviceFormatArgs(tc.device)
 			if tc.shouldError {
 				require.Error(t, err)
 				return

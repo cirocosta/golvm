@@ -19,7 +19,7 @@ FROM alpine
 COPY --from=builder /usr/bin/golvm /golvm
 
 RUN set -x && \
-  apk add --update lvm2 cryptsetup && \
+  apk add --update lvm2 cryptsetup util-linux e2fsprogs xfsprogs && \
   mkdir -p /var/log/golvm /mnt
 
 CMD [ "golvm" ]

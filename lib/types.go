@@ -71,6 +71,8 @@ type LogicalVolume struct {
 	DataPercent     string  `json:"data_percent"`
 	LvAttr          string  `json:"lv_attr"`
 	LvName          string  `json:"lv_name"`
+	LvFullName      string  `json:"lv_full_name"`
+	LvDmPath        string  `json:"lv_dm_path"`
 	LvSize          float64 `json:"lv_size,string"`
 	MetadataPercent string  `json:"metadata_percent"`
 	MirrorLog       string  `json:"mirror_log"`

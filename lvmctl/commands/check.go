@@ -54,13 +54,14 @@ var Check = cli.Command{
 
 		fmt.Println("")
 		fmt.Println("LOGICAL VOLUMES")
-		fmt.Fprintln(w, "NAME\tVG\tSIZE\tPOOL\t")
+		fmt.Fprintln(w, "NAME\tVG\tSIZE\tPOOL\tDEVICE\t")
 		for _, lv := range lvs {
-			fmt.Fprintf(w, "%s\t%s\t%.2f\t%s\n",
+			fmt.Fprintf(w, "%s\t%s\t%.2f\t%s\t%s\n",
 				lv.LvName,
 				lv.VgName,
 				lv.LvSize,
-				lv.PoolLv)
+				lv.PoolLv,
+				lv.LvDmPath)
 		}
 		w.Flush()
 
