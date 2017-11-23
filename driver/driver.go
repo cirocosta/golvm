@@ -62,6 +62,7 @@ func NewDriver(cfg DriverConfig) (d Driver, err error) {
 			Err(err).
 			Str("file", cfg.VgWhitelistFile).
 			Msg("couldn't read vgs from whitelist file")
+		err = nil
 	}
 
 	for vg, _ := range whitelist {

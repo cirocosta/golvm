@@ -38,6 +38,24 @@ func NewDirManager(cfg DirManagerConfig) (manager DirManager, err error) {
 		return
 	}
 
+	_, err = os.Stat(cfg.Root)
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(cfg.Root, 0755)
+			if err != nil {
+				err = errors.Wrapf(err,
+					"Failed to create directory %s",
+					cfg.Root)
+				return
+			}
+		} else {
+			err = errors.Wrapf(err,
+				"errored inspecting directory %s",
+				cfg.Root)
+			return
+		}
+	}
+
 	err = unix.Access(cfg.Root, unix.W_OK)
 	if err != nil {
 		err = errors.Wrapf(err,
