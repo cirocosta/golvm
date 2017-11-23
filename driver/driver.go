@@ -180,6 +180,9 @@ func (d Driver) Get(req *v.GetRequest) (resp *v.GetResponse, err error) {
 	}
 
 	if vol == nil {
+		err = errors.Errorf(
+			"Couldn't find path for volume %s",
+			req.Name)
 		return
 	}
 
@@ -237,6 +240,9 @@ func (d Driver) Path(req *v.PathRequest) (resp *v.PathResponse, err error) {
 	}
 
 	if vol == nil {
+		err = errors.Errorf(
+			"Couldn't find path for volume %s",
+			req.Name)
 		return
 	}
 

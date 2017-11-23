@@ -29,7 +29,8 @@
         {
             "Destination": "/dev",
             "Options": [
-                "bind"
+                "rbind",
+                "rprivate"
             ],
             "Source": "/dev",
             "Type": "bind"
