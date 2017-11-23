@@ -1,6 +1,5 @@
 package lib
 
-
 import (
 	"testing"
 
@@ -8,293 +7,288 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
-const (
-	respPvs1 = `
-{
-    "report": [
-        {
-            "pv": [
-                {
-                    "pv_attr": "a--",
-                    "pv_fmt": "lvm2",
-                    "pv_free": "48.00",
-                    "pv_name": "/dev/loop0",
-                    "pv_size": "48.00",
-                    "vg_name": "myvg"
-                }
-            ]
-        }
-    ]
-}`
-
-	respVgs1 = `
-{
-    "report": [
-        {
-            "vg": [
-                {
-                    "lv_count": "0",
-                    "pv_count": "1",
-                    "snap_count": "0",
-                    "vg_attr": "wz--n-",
-                    "vg_free": "48.00",
-                    "vg_name": "myvg",
-                    "vg_size": "48.00"
-                }
-            ]
-        }
-    ]
-}`
-	respLvs1 = `
-{
-    "report": [
-        {
-            "lv": [
-                {
-                    "convert_lv": "",
-                    "copy_percent": "",
-                    "data_percent": "",
-                    "lv_attr": "-wi-a-----",
-                    "lv_name": "lv1",
-                    "lv_size": "12.00",
-                    "metadata_percent": "",
-                    "mirror_log": "",
-                    "move_pv": "",
-                    "origin": "",
-                    "pool_lv": "",
-                    "vg_name": "myvg",
-		    "lv_dm_path": "/dev/mapper/volgroup0-tvol2"
-                }
-            ]
-        }
-    ]
-}`
-)
-
-func TestParsePhysycalVolumesOutput(t *testing.T) {
+func TestBuildGetDeviceFormatArgs(t *testing.T) {
 	var testCases = []struct {
 		desc        string
-		input       []byte
-		expected    []*PhysicalVolume
+		device      string
+		expected    []string
 		shouldError bool
 	}{
 		{
-			desc:        "nil input should fail",
-			input:       nil,
+			desc:        "fail with empty device",
+			device:      "",
+			expected:    []string{},
 			shouldError: true,
 		},
 		{
-			desc:        "empty input should fail",
-			input:       []byte(""),
-			expected:    []*PhysicalVolume{},
-			shouldError: true,
-		},
-		{
-			desc:  "valid response should return valid",
-			input: []byte(respPvs1),
-			expected: []*PhysicalVolume{
-				&PhysicalVolume{
-					Attr:             "a--",
-					Fmt:              "lvm2",
-					PhysicalSize:     48,
-					PhysicalVolume:   "/dev/loop0",
-					PhysicalSizeFree: 48,
-					VolumeGroup:      "myvg",
-				},
+			desc:   "works with device",
+			device: "/dev/device",
+			expected: []string{
+				"--noheadings",
+				"--discard",
+				"--output=FSTYPE",
+				"/dev/device",
 			},
 			shouldError: false,
 		},
 	}
 
 	var (
-		err    error
-		infos  []*PhysicalVolume
-		actual *PhysicalVolume
+		err  error
+		args []string
 	)
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			infos, err = DecodePhysicalVolumesResponse(tc.input)
+			args, err = BuildGetDeviceFormatArgs(tc.device)
 			if tc.shouldError {
 				require.Error(t, err)
 				return
 			}
 
 			require.NoError(t, err)
-			require.Equal(t, len(tc.expected), len(infos))
-
-			for ndx, expectedInfo := range tc.expected {
-				actual = infos[ndx]
-
-				assert.Equal(t,
-					expectedInfo.Attr,
-					actual.Attr)
-				assert.Equal(t,
-					expectedInfo.VolumeGroup,
-					actual.VolumeGroup)
-				assert.Equal(t,
-					expectedInfo.Fmt,
-					actual.Fmt)
-				assert.Equal(t,
-					expectedInfo.PhysicalSize,
-					actual.PhysicalSize)
-				assert.Equal(t,
-					expectedInfo.PhysicalSizeFree,
-					actual.PhysicalSizeFree)
+			require.Equal(t, len(tc.expected), len(args))
+			for ndx, arg := range args {
+				assert.Equal(t, tc.expected[ndx], arg)
 			}
-
 		})
 	}
 }
 
-func TestParseVolumeGroupsOutput(t *testing.T) {
+func TestBuildMakeFsArgs(t *testing.T) {
 	var testCases = []struct {
 		desc        string
-		input       []byte
-		expected    []*VolumeGroup
+		fsType      string
+		device      string
+		expected    []string
 		shouldError bool
 	}{
 		{
-			desc:        "nil input should fail",
-			input:       nil,
+			desc:        "fail with empty fstype",
+			fsType:      "",
+			device:      "",
+			expected:    []string{},
 			shouldError: true,
 		},
 		{
-			desc:        "empty input should fail",
-			input:       []byte(""),
-			expected:    []*VolumeGroup{},
+			desc:        "fail with empty device",
+			fsType:      "ext4",
+			device:      "",
+			expected:    []string{},
 			shouldError: true,
 		},
 		{
-			desc:  "valid response should return valid",
-			input: []byte(respVgs1),
-			expected: []*VolumeGroup{
-				&VolumeGroup{
-					Attr:      "wz--n-",
-					Name:      "myvg",
-					Free:      48,
-					Size:      48,
-					LvCount:   0,
-					PvCount:   1,
-					SnapCount: 0,
-				},
+			desc:        "fail with unknown fstype",
+			fsType:      "unknown",
+			device:      "/dev/device",
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc:   "works with ext4",
+			fsType: "ext4",
+			device: "/dev/device",
+			expected: []string{
+				"-t",
+				"ext4",
+				"/dev/device",
+			},
+			shouldError: false,
+		},
+		{
+			desc:   "works with xfs",
+			fsType: "xfs",
+			device: "/dev/device",
+			expected: []string{
+				"-t",
+				"xfs",
+				"/dev/device",
 			},
 			shouldError: false,
 		},
 	}
 
 	var (
-		err    error
-		infos  []*VolumeGroup
-		actual *VolumeGroup
+		err  error
+		args []string
 	)
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			infos, err = DecodeVolumeGroupsResponse(tc.input)
+			args, err = BuildMakeFsArgs(tc.fsType, tc.device)
 			if tc.shouldError {
 				require.Error(t, err)
 				return
 			}
 
 			require.NoError(t, err)
-			require.Equal(t, len(tc.expected), len(infos))
-
-			for ndx, expectedInfo := range tc.expected {
-				actual = infos[ndx]
-
-				assert.Equal(t,
-					expectedInfo.Attr,
-					actual.Attr)
-				assert.Equal(t,
-					expectedInfo.Name,
-					actual.Name)
-				assert.Equal(t,
-					expectedInfo.Free,
-					actual.Free)
-				assert.Equal(t,
-					expectedInfo.Size,
-					actual.Size)
-				assert.Equal(t,
-					expectedInfo.LvCount,
-					actual.LvCount)
-				assert.Equal(t,
-					expectedInfo.PvCount,
-					actual.PvCount)
-				assert.Equal(t,
-					expectedInfo.SnapCount,
-					actual.SnapCount)
+			require.Equal(t, len(tc.expected), len(args))
+			for ndx, arg := range args {
+				assert.Equal(t, tc.expected[ndx], arg)
 			}
-
 		})
 	}
 }
 
-func TestParseLogicalVolumesOutput(t *testing.T) {
+func TestBuildLogicalVolumeRemovalArgs(t *testing.T) {
 	var testCases = []struct {
 		desc        string
-		input       []byte
-		expected    []*LogicalVolume
+		cfg         LvRemovalConfig
+		expected    []string
 		shouldError bool
 	}{
 		{
-			desc:        "nil input should fail",
-			input:       nil,
+			desc:        "without a lvName should fail",
+			cfg:         LvRemovalConfig{},
+			expected:    []string{},
 			shouldError: true,
 		},
 		{
-			desc:        "empty input should fail",
-			input:       []byte(""),
-			expected:    []*LogicalVolume{},
+			desc: "without a vgName should fail",
+			cfg: LvRemovalConfig{
+				LvName: "lv",
+			},
+			expected:    []string{},
 			shouldError: true,
 		},
 		{
-			desc:  "valid response should return valid",
-			input: []byte(respLvs1),
-			expected: []*LogicalVolume{
-				&LogicalVolume{
-					LvName:   "lv1",
-					LvSize:   12.0,
-					LvAttr:   "-wi-a-----",
-					LvDmPath: "/dev/mapper/volgroup0-tvol2",
-				},
+			desc: "works with vg and lv names",
+			cfg: LvRemovalConfig{
+				LvName: "lv",
+				VgName: "vg",
+			},
+			expected: []string{
+				"--force", "vg/lv",
 			},
 			shouldError: false,
 		},
 	}
 
 	var (
-		err    error
-		infos  []*LogicalVolume
-		actual *LogicalVolume
+		err  error
+		args []string
 	)
 
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			infos, err = DecodeLogicalVolumesResponse(tc.input)
+			args, err = BuildLogicalVolumeRemovalArgs(tc.cfg)
 			if tc.shouldError {
 				require.Error(t, err)
 				return
 			}
 
 			require.NoError(t, err)
-			require.Equal(t, len(tc.expected), len(infos))
-
-			for ndx, expectedInfo := range tc.expected {
-				actual = infos[ndx]
-
-				assert.Equal(t,
-					expectedInfo.LvName,
-					actual.LvName)
-				assert.Equal(t,
-					expectedInfo.LvSize,
-					actual.LvSize)
-				assert.Equal(t,
-					expectedInfo.LvAttr,
-					actual.LvAttr)
+			require.Equal(t, len(tc.expected), len(args))
+			for ndx, arg := range args {
+				assert.Equal(t, tc.expected[ndx], arg)
 			}
-
 		})
 	}
+}
+
+func TestBuildLogicalVolumeCreationArgs(t *testing.T) {
+	var testCases = []struct {
+		desc        string
+		cfg         *LvCreationConfig
+		expected    []string
+		shouldError bool
+	}{
+		{
+			desc:        "without a name should fail",
+			cfg:         &LvCreationConfig{},
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc: "without a vg should fail",
+			cfg: &LvCreationConfig{
+				Name: "haha",
+			},
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc: "fails with only name and vg",
+			cfg: &LvCreationConfig{
+				Name:        "name",
+				VolumeGroup: "volumegroup",
+			},
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc: "snap fails with only name and vg",
+			cfg: &LvCreationConfig{
+				Name:        "name",
+				VolumeGroup: "volumegroup",
+				Snapshot:    "snapshot",
+			},
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc: "snap fails with only name and vg",
+			cfg: &LvCreationConfig{
+				Name:        "name",
+				VolumeGroup: "volumegroup",
+				Snapshot:    "snapshot",
+			},
+			expected:    []string{},
+			shouldError: true,
+		},
+		{
+			desc: "vol works with name, size and vg",
+			cfg: &LvCreationConfig{
+				Name:        "name",
+				VolumeGroup: "volumegroup",
+				Size:        "22M",
+			},
+			expected: []string{
+				"--setactivationskip", "n",
+				"--name", "name",
+				"--size", "22M",
+				"volumegroup",
+			},
+			shouldError: false,
+		},
+		{
+			desc: "thin vol works with name, thinpool, size and vg",
+			cfg: &LvCreationConfig{
+				Name:        "name",
+				VolumeGroup: "volumegroup",
+				Size:        "22M",
+				ThinPool:    "tp",
+			},
+			expected: []string{
+				"--setactivationskip", "n",
+				"--name", "name",
+				"--virtualsize", "22M",
+				"--thin",
+				"volumegroup/tp",
+			},
+			shouldError: false,
+		},
+	}
+
+	var (
+		err  error
+		args []string
+	)
+
+	for _, tc := range testCases {
+		t.Run(tc.desc, func(t *testing.T) {
+			args, err = BuildLogicalVolumeCretionArgs(tc.cfg)
+			if tc.shouldError {
+				require.Error(t, err)
+				return
+			}
+
+			require.NoError(t, err)
+			require.Equal(t, len(tc.expected), len(args))
+			for ndx, arg := range args {
+				assert.Equal(t, tc.expected[ndx], arg)
+			}
+		})
+	}
+
 }
