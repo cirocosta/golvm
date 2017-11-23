@@ -1,6 +1,17 @@
+
 # golvm
 
 `golvm` provides both a library for dealing with LVM operations as well as a docker plugin (`lvmvol`).
+
+- [Plugin](#plugin)
+  - [Activation](#activation)
+    - [Default configuration](#default-configuration)
+    - [Custom configuration](#custom-configuration)
+  - [Usage](#usage)
+- [`lvmctl` Usage](#lvmctl-usage)
+- [Examples](#examples)
+- [Docker Plugin](#docker-plugin)
+- [TODO](#todo)
 
 ## Plugin
 
