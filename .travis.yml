@@ -16,7 +16,7 @@ install:
   - 'make plugin'
 
 script:
-  - 'cd ./lib && sudo /home/travis/.gimme/versions/go/bin/go test -v'
+  - 'make test'
 
 notifications:
   email: false

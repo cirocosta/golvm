@@ -35,7 +35,7 @@ var Rm = cli.Command{
 			utils.Abort(errors.Errorf("All parameters must be set."))
 		}
 
-		args, err = lvm.BuildLogicalVolumeRemovalArgs(lib.LvRemovalConfig{
+		args, err = lib.BuildLogicalVolumeRemovalArgs(lib.LvRemovalConfig{
 			LvName: name,
 			VgName: volumegroup,
 		})

@@ -108,7 +108,7 @@ func (d Driver) Create(req *v.CreateRequest) (err error) {
 		FsType:      fstype,
 	}
 
-	args, err = d.lvm.BuildLogicalVolumeCretionArgs(config)
+	args, err = lib.BuildLogicalVolumeCretionArgs(config)
 	if err != nil {
 		err = errors.Wrapf(err, "couldn't build volume creation args")
 		return
@@ -242,7 +242,7 @@ func (d Driver) Remove(req *v.RemoveRequest) (err error) {
 		// remove
 	}
 
-	args, err := d.lvm.BuildLogicalVolumeRemovalArgs(lib.LvRemovalConfig{
+	args, err := lib.BuildLogicalVolumeRemovalArgs(lib.LvRemovalConfig{
 		LvName: vol.LvName,
 		VgName: vol.VgName,
 	})

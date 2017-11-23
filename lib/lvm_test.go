@@ -325,16 +325,12 @@ func TestBuildGetDeviceFormatArgs(t *testing.T) {
 
 	var (
 		err  error
-		l    Lvm
 		args []string
 	)
 
-	l, err = NewLvm(LvmConfig{})
-	require.NoError(t, err)
-
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			args, err = l.BuildGetDeviceFormatArgs(tc.device)
+			args, err = BuildGetDeviceFormatArgs(tc.device)
 			if tc.shouldError {
 				require.Error(t, err)
 				return
@@ -404,16 +400,12 @@ func TestBuildMakeFsArgs(t *testing.T) {
 
 	var (
 		err  error
-		l    Lvm
 		args []string
 	)
 
-	l, err = NewLvm(LvmConfig{})
-	require.NoError(t, err)
-
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			args, err = l.BuildMakeFsArgs(tc.fsType, tc.device)
+			args, err = BuildMakeFsArgs(tc.fsType, tc.device)
 			if tc.shouldError {
 				require.Error(t, err)
 				return
@@ -464,16 +456,12 @@ func TestBuildLogicalVolumeRemovalArgs(t *testing.T) {
 
 	var (
 		err  error
-		l    Lvm
 		args []string
 	)
 
-	l, err = NewLvm(LvmConfig{})
-	require.NoError(t, err)
-
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			args, err = l.BuildLogicalVolumeRemovalArgs(tc.cfg)
+			args, err = BuildLogicalVolumeRemovalArgs(tc.cfg)
 			if tc.shouldError {
 				require.Error(t, err)
 				return
@@ -574,16 +562,12 @@ func TestBuildLogicalVolumeCreationArgs(t *testing.T) {
 
 	var (
 		err  error
-		l    Lvm
 		args []string
 	)
 
-	l, err = NewLvm(LvmConfig{})
-	require.NoError(t, err)
-
 	for _, tc := range testCases {
 		t.Run(tc.desc, func(t *testing.T) {
-			args, err = l.BuildLogicalVolumeCretionArgs(tc.cfg)
+			args, err = BuildLogicalVolumeCretionArgs(tc.cfg)
 			if tc.shouldError {
 				require.Error(t, err)
 				return

@@ -74,7 +74,7 @@ var Create = cli.Command{
 			volumegroup = vg.Name
 		}
 
-		args, err = lvm.BuildLogicalVolumeCretionArgs(&lib.LvCreationConfig{
+		args, err = lib.BuildLogicalVolumeCretionArgs(&lib.LvCreationConfig{
 			Name:        name,
 			Size:        size,
 			VolumeGroup: volumegroup,
