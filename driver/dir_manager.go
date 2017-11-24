@@ -10,10 +10,18 @@ import (
 	"golang.org/x/sys/unix"
 )
 
+// DirManager is responsible for managing directories
+// under a specific root.
+// It's main functionalities include:
+//	-	creating directories
+//	-	inspecting directories
+//	-	removing directories
 type DirManager struct {
 	root string
 }
 
+// DirManagerConfig provides the minimum configuration for
+// instantiating a DirManager.
 type DirManagerConfig struct {
 	Root string
 }
@@ -25,6 +33,7 @@ var (
 	ErrNotFound    = errors.Errorf("Volume not found")
 )
 
+// NewDirManager instantiates a new DirManager.
 func NewDirManager(cfg DirManagerConfig) (manager DirManager, err error) {
 	if cfg.Root == "" {
 		err = errors.Errorf("A root must be specified.")
