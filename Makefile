@@ -43,9 +43,7 @@ plugin: rootfs
 plugin-push: rootfs
 	docker plugin rm --force $(PLUGIN_FULL_NAME) || true
 	docker plugin create $(PLUGIN_FULL_NAME) ./plugin
-	docker plugin create $(PLUGIN_FULL_NAME):$(VERSION) ./plugin
 	docker plugin push $(PLUGIN_FULL_NAME)
-	docker plugin push $(PLUGIN_FULL_NAME):$(VERSION)
 
 
 .PHONY: fmt install test

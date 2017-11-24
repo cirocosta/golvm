@@ -11,6 +11,9 @@ import (
 	v "github.com/docker/go-plugins-helpers/volume"
 )
 
+// Driver implements the Docker Volume plugin interface.
+// It's responsible for making use of the 'golvm' library
+// to manager LVM volumes across multiple volumegroups.
 type Driver struct {
 	lvm         *lib.Lvm
 	dirManager  *DirManager
@@ -21,13 +24,30 @@ type Driver struct {
 	sync.Mutex
 }
 
+// DriverConfig provides the minimum configuration for
+// instantiating a golvm Driver.
 type DriverConfig struct {
-	Lvm             *lib.Lvm
-	DirManager      *DirManager
+	// Lvm instance responsible for managing LVM
+	// devices and volumes.
+	Lvm *lib.Lvm
+
+	// DirManager responsible for managing a root
+	// directory where the volumes are mounted to.
+	DirManager *DirManager
+
+	// VgWhitelistFile is the absolute path to a
+	// file containing a list (line by line) of
+	// volumegroups that can be looked up when
+	// no specific volumegroup is specified.
 	VgWhitelistFile string
-	MountsFile      string
+
+	// MountsFile corresponds to the file describing
+	// the mounts of the system. Usually this file
+	// is '/proc/mounts' but the file can be anywhere.
+	MountsFile string
 }
 
+// NewDriver instantiates a new Driver from a DriverConfig.
 func NewDriver(cfg DriverConfig) (d Driver, err error) {
 	var whitelist map[string]bool
 
