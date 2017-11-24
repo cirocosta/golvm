@@ -181,6 +181,9 @@ func (l Lvm) ListLogicalVolumes() (vols []*LogicalVolume, err error) {
 	return
 }
 
+// LuksFormat formats a given device as a luks
+// device making use of a given key to encrypt
+// it.
 func (l Lvm) LuksFormat(key, device string) (err error) {
 	if key == "" || device == "" {
 		err = errors.Errorf("key and device must be non-empty")
@@ -192,6 +195,73 @@ func (l Lvm) LuksFormat(key, device string) (err error) {
 		"--key-file=" + key,
 		"luksFormat",
 		device,
+	}
+
+	_, err = l.Run("cryptsetup", args...)
+	return
+}
+
+// LuksClose removes the luks mapping of a logical volume's
+// device mapper device with a luks device.
+func (l Lvm) LuksClose(vol *LogicalVolume) (err error) {
+	if vol == nil {
+		err = errors.Errorf("vol must be non-nill")
+		return
+	}
+
+	if vol.LvName == "" {
+		err = errors.Errorf("vol.LvName must be non empty")
+		return
+	}
+
+	var args = []string{
+		"luksClose",
+		"luks-" + vol.LvName,
+	}
+
+	_, err = l.Run("cryptsetup", args...)
+	return
+}
+
+// LuksOpen creates a mapping between a logical volume's
+// device mapper device with a luks device.
+func (l Lvm) LuksOpen(key string, vol *LogicalVolume) (err error) {
+	var finfo os.FileInfo
+
+	if key == "" {
+		err = errors.Errorf("key must be non-empty")
+		return
+	}
+
+	if vol == nil {
+		err = errors.Errorf("vol can't be nil")
+		return
+	}
+
+	if vol.LvName == "" || vol.LvDmPath == "" {
+		err = errors.Errorf(
+			"vol's LvName and LvDmPath properties must be set")
+		return
+	}
+
+	finfo, err = os.Stat(key)
+	if err != nil {
+		err = errors.Wrapf(err, "failed looking for key %s", key)
+		return
+	}
+
+	if finfo.IsDir() {
+		err = errors.Errorf(
+			"key %s is a directory - must be a regular file",
+			key)
+		return
+	}
+
+	var args = []string{
+		"--key-file=" + key,
+		"luksOpen",
+		vol.LvDmPath,
+		"luks-" + vol.LvName,
 	}
 
 	_, err = l.Run("cryptsetup", args...)
