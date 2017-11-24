@@ -13,10 +13,16 @@ before_install:
 
 install:
   - 'sudo bash ./utils/create.sh'
-  - 'make plugin'
+  - 'sudo make plugin'
 
 script:
   - 'make test'
+
+after_success:
+  - if [[ "$TRAVIS_BRANCH" == "master" ]]; then
+      docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD ;
+      sudo make plugin-push ;
+    fi
 
 notifications:
   email: false
