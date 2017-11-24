@@ -181,14 +181,41 @@ func (l Lvm) ListLogicalVolumes() (vols []*LogicalVolume, err error) {
 	return
 }
 
+func (l Lvm) LuksFormat(key, device string) (err error) {
+	if key == "" || device == "" {
+		err = errors.Errorf("key and device must be non-empty")
+		return
+	}
+
+	var args = []string{
+		"--batch-mode",
+		"--key-file=" + key,
+		"luksFormat",
+		device,
+	}
+
+	_, err = l.Run("cryptsetup", args...)
+	return
+}
+
 // Mount runs the 'mount' command with the arguments provided.
 func (l Lvm) Mount(device, location string) (err error) {
+	if device == "" || location == "" {
+		err = errors.Errorf("device and location must be non-empty")
+		return
+	}
+
 	_, err = l.Run("mount", device, location)
 	return
 }
 
 // Unmount runs the 'umount' command with the arguments provided.
 func (l Lvm) Unmount(location string) (err error) {
+	if location == "" {
+		err = errors.Errorf("location can't be empty")
+		return
+	}
+
 	_, err = l.Run("umount", location)
 	return
 }
